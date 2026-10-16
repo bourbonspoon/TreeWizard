@@ -1,0 +1,138 @@
+using System;
+using UnityEngine;
+
+namespace TreeWizard
+{
+    /// <summary>
+    /// Everything needed to generate a tree. Plain serializable data, so it works in the
+    /// inspector, in ScriptableObjects and as JSON (JsonUtility) in the standalone app.
+    /// </summary>
+    [Serializable]
+    public class TreeDefinition
+    {
+        public const int MaxBranchLevels = 3;
+
+        [Tooltip("Same seed and settings always give the same tree.")]
+        public int seed = 1;
+
+        public TrunkSettings trunk = new TrunkSettings();
+
+        [Tooltip("Up to three levels. Each level grows off every branch of the level before it.")]
+        public BranchLevelSettings[] branchLevels =
+        {
+            new BranchLevelSettings(),
+            new BranchLevelSettings
+            {
+                count = 6,
+                start = 0.2f,
+                angle = 40f,
+                length = 0.4f,
+                lengthAtEnd = 0.6f,
+                radius = 0.6f,
+                gravity = 0.05f,
+                segments = 4,
+            },
+        };
+
+        public LeafSettings leaves = new LeafSettings();
+        public MeshSettings mesh = new MeshSettings();
+    }
+
+    [Serializable]
+    public class TrunkSettings
+    {
+        [Min(0.1f)] public float height = 6f;
+
+        [Tooltip("Radius at the base, above the flare.")]
+        [Min(0.01f)] public float radius = 0.25f;
+
+        [Tooltip("Radius at the top, as a fraction of the base radius.")]
+        [Range(0f, 1f)] public float tipRadius = 0.1f;
+
+        [Tooltip("Extra radius at ground level, as a fraction of the base radius.")]
+        [Range(0f, 2f)] public float flare = 0.6f;
+
+        [Tooltip("How far up the flare reaches, as a fraction of the height.")]
+        [Range(0f, 0.5f)] public float flareHeight = 0.1f;
+
+        [Range(0f, 1f)] public float crookedness = 0.15f;
+
+        [Tooltip("Rings along the trunk.")]
+        [Range(2, 64)] public int segments = 10;
+    }
+
+    [Serializable]
+    public class BranchLevelSettings
+    {
+        [Tooltip("Branches per parent branch.")]
+        [Min(0)] public int count = 14;
+
+        [Tooltip("Where branches start along the parent (0 = base, 1 = tip).")]
+        [Range(0f, 1f)] public float start = 0.3f;
+
+        [Tooltip("Where branches stop along the parent (0 = base, 1 = tip).")]
+        [Range(0f, 1f)] public float end = 0.95f;
+
+        [Tooltip("Angle away from the parent, in degrees.")]
+        [Range(0f, 180f)] public float angle = 55f;
+
+        [Range(0f, 90f)] public float angleVariance = 10f;
+
+        [Tooltip("Length as a fraction of the parent's length.")]
+        [Range(0f, 2f)] public float length = 0.45f;
+
+        [Tooltip("Length multiplier for branches at the end of the range. Below 1 gives a conical shape.")]
+        [Range(0f, 2f)] public float lengthAtEnd = 0.4f;
+
+        [Range(0f, 1f)] public float lengthVariance = 0.2f;
+
+        [Tooltip("Base radius as a fraction of the parent's radius where it attaches.")]
+        [Range(0.05f, 1f)] public float radius = 0.55f;
+
+        [Tooltip("Positive droops towards the ground, negative reaches up.")]
+        [Range(-1f, 1f)] public float gravity = 0.15f;
+
+        [Range(0f, 1f)] public float crookedness = 0.2f;
+
+        [Tooltip("Rings along each branch.")]
+        [Range(2, 32)] public int segments = 6;
+    }
+
+    public enum LeafShape
+    {
+        /// <summary>One double-sided card.</summary>
+        Quad,
+        /// <summary>Two crossed double-sided cards, fuller from every angle.</summary>
+        Cross,
+    }
+
+    [Serializable]
+    public class LeafSettings
+    {
+        public bool enabled = true;
+
+        [Tooltip("Leaves per outermost branch.")]
+        [Min(0)] public int count = 8;
+
+        [Tooltip("Where leaves start along the branch (0 = base, 1 = tip).")]
+        [Range(0f, 1f)] public float start = 0.3f;
+
+        [Min(0.01f)] public float size = 0.35f;
+
+        [Range(0f, 1f)] public float sizeVariance = 0.3f;
+
+        [Tooltip("Angle away from the branch, in degrees.")]
+        [Range(0f, 90f)] public float angle = 45f;
+
+        public LeafShape shape = LeafShape.Quad;
+    }
+
+    [Serializable]
+    public class MeshSettings
+    {
+        [Tooltip("Sides around the trunk. Branches use fewer, scaled by their radius.")]
+        [Range(3, 32)] public int radialSegments = 8;
+
+        [Range(3, 16)] public int minRadialSegments = 4;
+    }
+}

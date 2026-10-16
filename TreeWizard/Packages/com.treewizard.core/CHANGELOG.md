@@ -6,3 +6,5 @@ All notable changes to this package are documented here. The format follows [Kee
 
 ### Added
 - Package skeleton.
+- Tree generator: trunk with flare, up to three branch levels, and leaf cards (single or crossed), all driven by a seed.
+- `TreeWizardTree` component that rebuilds the mesh live as settings change.
