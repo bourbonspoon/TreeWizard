@@ -1,0 +1,7 @@
+{
+    "name": "TreeWizard.Editor",
+    "rootNamespace": "TreeWizard.Editor",
+    "references": ["TreeWizard.Runtime"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

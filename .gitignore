@@ -1,0 +1,49 @@
+# Unity project lives in TreeWizard/. Generated folders are anchored there.
+/TreeWizard/[Ll]ibrary/
+/TreeWizard/[Tt]emp/
+/TreeWizard/[Oo]bj/
+/TreeWizard/[Bb]uild/
+/TreeWizard/[Bb]uilds/
+/TreeWizard/[Ll]ogs/
+/TreeWizard/[Uu]ser[Ss]ettings/
+/TreeWizard/[Mm]emoryCaptures/
+/TreeWizard/[Rr]ecordings/
+/TreeWizard/Assets/Plugins/Editor/JetBrains*
+/TreeWizard/Assets/AssetStoreTools*
+
+# IDE / generated solution files
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Crash reports / builds
+sysinfo.txt
+crashlytics-build.properties
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Local scratch space (not versioned)
+/Scratch/
+
+# OS
+.DS_Store

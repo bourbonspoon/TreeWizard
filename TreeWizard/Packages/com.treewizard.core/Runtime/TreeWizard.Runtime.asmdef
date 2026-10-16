@@ -1,0 +1,6 @@
+{
+    "name": "TreeWizard.Runtime",
+    "rootNamespace": "TreeWizard",
+    "references": [],
+    "autoReferenced": true
+}

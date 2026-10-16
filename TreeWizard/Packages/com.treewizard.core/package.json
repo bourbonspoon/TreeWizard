@@ -1,0 +1,13 @@
+{
+  "name": "com.treewizard.core",
+  "displayName": "TreeWizard",
+  "version": "0.1.0",
+  "unity": "6000.7",
+  "description": "Free, open-source procedural tree generator. Build trees from a stack of trunk, branch and leaf generators, then bake meshes, materials and LODs.",
+  "keywords": ["tree", "procedural", "vegetation", "foliage", "mesh", "generator"],
+  "license": "MIT",
+  "author": {
+    "name": "Tim Gunn"
+  },
+  "dependencies": {}
+}
