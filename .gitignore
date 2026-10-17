@@ -42,8 +42,9 @@ crashlytics-build.properties
 *.unitypackage
 *.app
 
-# Local scratch space (not versioned)
+# Local scratch space and source art (not versioned; the repo ships only the built atlases)
 /Scratch/
+/RawTextures/
 
 # OS
 .DS_Store

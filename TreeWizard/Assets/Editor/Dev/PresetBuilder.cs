@@ -8,7 +8,8 @@ using UnityEngine;
 namespace TreeWizardDev
 {
     /// <summary>
-    /// Rebuilds the package's preset leaf atlases from the source sheets in RawTextures/ (repo root):
+    /// Rebuilds the package's preset leaf atlases from the source sheets in RawTextures/ (repo root,
+    /// kept out of git to keep clones light, so only maintainers with the sheets can run this):
     ///   Unity -batchmode -projectPath . -executeMethod TreeWizardDev.PresetBuilder.BuildAll
     /// </summary>
     public static class PresetBuilder
