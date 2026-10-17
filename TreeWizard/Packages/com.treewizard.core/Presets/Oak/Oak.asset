@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1789ede45cbf141819cdbeff493ff98f, type: 3}
+  m_Name: Oak
+  m_EditorClassIdentifier: TreeWizard.Runtime::TreeWizard.TreePreset
+  definition:
+    seed: 1
+    trunk:
+      height: 6
+      radius: 0.25
+      tipRadius: 0.1
+      flare: 0.6
+      flareHeight: 0.1
+      crookedness: 0.15
+      segments: 10
+    branchLevels:
+    - count: 14
+      start: 0.3
+      end: 0.95
+      angle: 55
+      angleVariance: 10
+      length: 0.45
+      lengthAtEnd: 0.4
+      lengthVariance: 0.2
+      radius: 0.55
+      gravity: 0.15
+      crookedness: 0.2
+      segments: 6
+    - count: 6
+      start: 0.2
+      end: 0.95
+      angle: 40
+      angleVariance: 10
+      length: 0.4
+      lengthAtEnd: 0.6
+      lengthVariance: 0.2
+      radius: 0.6
+      gravity: 0.05
+      crookedness: 0.2
+      segments: 4
+    leaves:
+      enabled: 1
+      count: 8
+      start: 0.3
+      size: 0.4
+      sizeVariance: 0.3
+      angle: 45
+      shape: 0
+      autumn: 0
+    mesh:
+      radialSegments: 8
+      minRadialSegments: 4
+  barkMaterial: {fileID: 2100000, guid: b96a7a1f78d754e819bd3fabc1d74941, type: 2}
+  leafMaterial: {fileID: 2100000, guid: f000a8e3b76fb49aa8f990ebda8120e0, type: 2}
+  leafAtlas: {fileID: 11400000, guid: 533659fa1a9ed4e1094149223916d417, type: 2}

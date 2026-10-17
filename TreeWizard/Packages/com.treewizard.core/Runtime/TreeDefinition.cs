@@ -36,6 +36,9 @@ namespace TreeWizard
 
         public LeafSettings leaves = new LeafSettings();
         public MeshSettings mesh = new MeshSettings();
+
+        /// <summary>Deep copy.</summary>
+        public TreeDefinition Clone() => JsonUtility.FromJson<TreeDefinition>(JsonUtility.ToJson(this));
     }
 
     [Serializable]

@@ -54,6 +54,16 @@ namespace TreeWizard
 #endif
         }
 
+        /// <summary>Copies the preset's settings, materials and leaf atlas onto this tree.</summary>
+        public void ApplyPreset(TreePreset preset)
+        {
+            definition = preset.definition.Clone();
+            barkMaterial = preset.barkMaterial;
+            leafMaterial = preset.leafMaterial;
+            leafAtlas = preset.leafAtlas;
+            MarkDirty();
+        }
+
         public void Rebuild()
         {
             _dirty = false;

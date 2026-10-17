@@ -94,19 +94,51 @@ namespace TreeWizardDev
             cam.transform.position = new Vector3(centerX, 3.5f, -distance);
             cam.transform.LookAt(new Vector3(centerX, 3.8f, 0f));
 
-            var rt = new RenderTexture(width, Height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { antiAliasing = 4 };
+            WriteRender(cam, width, Height, outPath);
+        }
+
+        /// <summary>Renders <paramref name="target"/> from a 3/4 view with a temporary camera. Works while the Editor is unfocused.</summary>
+        public static void Capture(GameObject target, string outPath, int width = 900, int height = 900)
+        {
+            var bounds = target.GetComponent<Renderer>().bounds;
+            var cam = new GameObject("TreePreview Camera") { hideFlags = HideFlags.HideAndDontSave }.AddComponent<Camera>();
+            try
+            {
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color(0.62f, 0.75f, 0.88f);
+                cam.fieldOfView = 30f;
+                cam.aspect = (float)width / height;
+                var distance = bounds.extents.magnitude / Mathf.Sin(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                cam.transform.position = bounds.center + Quaternion.Euler(10f, -30f, 0f) * Vector3.back * distance;
+                cam.transform.LookAt(bounds.center);
+                cam.nearClipPlane = 0.05f;
+                cam.farClipPlane = distance * 4f;
+                WriteRender(cam, width, height, outPath);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(cam.gameObject);
+            }
+        }
+
+        static void WriteRender(Camera cam, int width, int height, string outPath)
+        {
+            var rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { antiAliasing = 4 };
             cam.targetTexture = rt;
             cam.Render(); // warm-up: the first frame can draw with stale per-material constants
             cam.Render();
 
             RenderTexture.active = rt;
-            var tex = new Texture2D(width, Height, TextureFormat.RGB24, false);
-            tex.ReadPixels(new Rect(0, 0, width, Height), 0, 0);
+            var tex = new Texture2D(width, height, TextureFormat.RGB24, false);
+            tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             tex.Apply();
             RenderTexture.active = null;
+            cam.targetTexture = null;
+            UnityEngine.Object.DestroyImmediate(rt);
 
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath)));
             File.WriteAllBytes(outPath, tex.EncodeToPNG());
+            UnityEngine.Object.DestroyImmediate(tex);
             Debug.Log($"[TreePreview] wrote {Path.GetFullPath(outPath)}");
         }
 

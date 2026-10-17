@@ -11,3 +11,7 @@ All notable changes to this package are documented here. The format follows [Kee
 - Leaf atlases: `LeafSheetSlicer` finds each leaf or twig on transparent sheets, cleans background fringes and packs an atlas; `LeafAtlasBuilder` writes it as a texture plus `LeafAtlas` asset. Cards take each cell's proportions and stem position.
 - Autumn setting: the share of leaves drawn from an atlas's autumn-coloured cells.
 - Oak leaf atlas preset (36 summer and autumn twigs).
+- Tree presets (`TreePreset`): shape settings plus bark material, leaf material and leaf atlas. Ships with an Oak preset.
+- **GameObject > 3D Object > TreeWizard Tree** creates a tree from the Oak preset.
+- Tree inspector: preset picker, seed randomizer, foldable sections, add/remove branch levels, live triangle counts, Save as Preset and Bake to Prefab.
+- Bake to Prefab writes a static prefab with the mesh embedded; re-baking updates the mesh in place so existing references keep working.
