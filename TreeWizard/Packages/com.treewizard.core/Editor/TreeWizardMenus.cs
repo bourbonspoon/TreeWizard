@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TreeWizard.Editor
 {
-    static class TreeWizardMenus
+    public static class TreeWizardMenus
     {
         public const string PackageRoot = "Packages/com.treewizard.core";
         public const string DefaultPreset = PackageRoot + "/Presets/Oak/Oak.asset";

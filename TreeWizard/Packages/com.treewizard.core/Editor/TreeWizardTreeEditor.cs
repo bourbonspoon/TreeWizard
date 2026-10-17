@@ -44,6 +44,7 @@ namespace TreeWizard.Editor
             actions.Add(Grow(new Button(SaveAsPreset) { text = "Save as Preset…" }));
             actions.Add(Grow(new Button(BakeToPrefab) { text = "Bake to Prefab…" }));
             root.Add(actions);
+            root.Add(new Button(ExportFbx) { text = "Export FBX…", tooltip = "Write the tree as FBX, with its textures as PNGs beside it" });
 
             // Undo or an outside edit can change the number of branch levels.
             root.TrackPropertyValue(_definition.FindPropertyRelative(nameof(TreeDefinition.branchLevels) + ".Array.size"), _ => RebuildLevels());
@@ -177,6 +178,23 @@ namespace TreeWizard.Editor
                 return;
             EditorGUIUtility.PingObject(TreeBaker.BakeToPrefab(Tree, path));
         }
+
+        void ExportFbx()
+        {
+            var path = EditorUtility.SaveFilePanel("Export Tree as FBX", EditorPrefs.GetString(LastExportFolderKey, ""), Tree.name, "fbx");
+            if (string.IsNullOrEmpty(path))
+                return;
+            EditorPrefs.SetString(LastExportFolderKey, Path.GetDirectoryName(path));
+
+            TreeFbxExporter.Export(Tree, path);
+            var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            if (Path.GetFullPath(path).StartsWith(projectRoot))
+                AssetDatabase.Refresh();
+            else
+                EditorUtility.RevealInFinder(path);
+        }
+
+        const string LastExportFolderKey = "TreeWizard.LastExportFolder";
 
         Foldout Section(string title, SerializedProperty property, bool expanded)
         {

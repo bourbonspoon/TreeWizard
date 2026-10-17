@@ -1,7 +1,7 @@
 {
     "name": "TreeWizard.Editor.Tests",
     "rootNamespace": "TreeWizard.Editor.Tests",
-    "references": ["TreeWizard.Runtime", "TreeWizard.Editor", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "references": ["TreeWizard.Runtime", "TreeWizard.Editor", "TreeWizard.Fbx", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
     "includePlatforms": ["Editor"],
     "precompiledReferences": ["nunit.framework.dll"],
     "overrideReferences": true,

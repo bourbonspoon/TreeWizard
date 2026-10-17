@@ -1,6 +1,6 @@
 {
     "name": "TreeWizard.Runtime",
     "rootNamespace": "TreeWizard",
-    "references": [],
+    "references": ["TreeWizard.Fbx"],
     "autoReferenced": true
 }
