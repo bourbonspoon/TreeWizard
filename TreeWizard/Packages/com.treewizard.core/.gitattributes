@@ -1,0 +1,7 @@
+# The package is installed by git URL, and Unity's git install only fetches LFS files when the
+# user has git-lfs. Keep the package's binaries as plain git objects so it always works.
+*.png  -filter -diff -merge -text
+*.jpg  -filter -diff -merge -text
+*.tga  -filter -diff -merge -text
+*.fbx  -filter -diff -merge -text
+*.FBX  -filter -diff -merge -text

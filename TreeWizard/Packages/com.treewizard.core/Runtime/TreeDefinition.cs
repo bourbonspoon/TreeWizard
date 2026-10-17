@@ -117,7 +117,8 @@ namespace TreeWizard
         [Tooltip("Where leaves start along the branch (0 = base, 1 = tip).")]
         [Range(0f, 1f)] public float start = 0.3f;
 
-        [Min(0.01f)] public float size = 0.35f;
+        [Tooltip("Card height. Width follows the leaf texture's proportions.")]
+        [Min(0.01f)] public float size = 0.4f;
 
         [Range(0f, 1f)] public float sizeVariance = 0.3f;
 
@@ -125,6 +126,9 @@ namespace TreeWizard
         [Range(0f, 90f)] public float angle = 45f;
 
         public LeafShape shape = LeafShape.Quad;
+
+        [Tooltip("Share of leaves using the leaf atlas's autumn cells.")]
+        [Range(0f, 1f)] public float autumn;
     }
 
     [Serializable]

@@ -142,6 +142,60 @@ namespace TreeWizard.Editor.Tests
             Assert.AreEqual(TreeDefinition.MaxBranchLevels, skeleton.branches.Max(b => b.level));
         }
 
+        static readonly LeafCell[] TwoSeasons =
+        {
+            new LeafCell { uvRect = new Rect(0f, 0f, 0.5f, 1f), pivot = new Vector2(0.5f, 0f), aspect = 0.5f, weight = 1f },
+            new LeafCell { uvRect = new Rect(0.5f, 0f, 0.5f, 1f), pivot = new Vector2(0.5f, 0f), aspect = 0.5f, weight = 1f, autumn = true },
+        };
+
+        [TestCase(0f, 0)]
+        [TestCase(1f, 1)]
+        public void Autumn_PicksMatchingCells(float autumn, int expectedCell)
+        {
+            var def = new TreeDefinition();
+            def.leaves.autumn = autumn;
+
+            CollectionAssert.AreEquivalent(new[] { expectedCell }, TreeSkeleton.Generate(def, TwoSeasons).leaves.Select(l => l.cell).Distinct());
+        }
+
+        [Test]
+        public void Autumn_HalfwayMixesCells()
+        {
+            var def = new TreeDefinition();
+            def.leaves.autumn = 0.5f;
+            var leaves = TreeSkeleton.Generate(def, TwoSeasons).leaves;
+
+            var share = leaves.Count(l => l.cell == 1) / (float)leaves.Count;
+            Assert.AreEqual(0.5f, share, 0.1f);
+        }
+
+        [Test]
+        public void ZeroWeightCells_AreNeverPicked()
+        {
+            var cells = TwoSeasons.ToArray();
+            cells[0].weight = 0f;
+
+            Assert.IsTrue(TreeSkeleton.Generate(new TreeDefinition(), cells).leaves.All(l => l.cell == 1),
+                "with the only summer cell disabled, summer leaves fall back to any enabled cell");
+        }
+
+        [Test]
+        public void LeafCards_UseTheirCellsUvsAndProportions()
+        {
+            var def = new TreeDefinition();
+            def.leaves.autumn = 1f;
+            var data = TreeGenerator.Generate(def, TwoSeasons);
+
+            var leafVerts = data.Triangles(MeshData.LeafSubmesh).Distinct().ToList();
+            Assert.IsTrue(leafVerts.All(i => data.uvs[i].x >= 0.5f && data.uvs[i].x <= 1f), "UVs stay in the autumn cell");
+
+            // First card: v0..v3 are bottom-left, top-left, top-right, bottom-right.
+            var first = leafVerts.Min();
+            var height = Vector3.Distance(data.vertices[first], data.vertices[first + 1]);
+            var width = Vector3.Distance(data.vertices[first], data.vertices[first + 3]);
+            Assert.AreEqual(0.5f, width / height, 1e-3f);
+        }
+
         static bool IsFinite(Vector3 v) => float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z);
     }
 }

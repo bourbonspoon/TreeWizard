@@ -62,6 +62,8 @@ namespace TreeWizard
         public Vector3 width;
         public Vector3 normal;
         public float size;
+        /// <summary>Index into the leaf cells, or -1 for the whole texture.</summary>
+        public int cell;
     }
 
     /// <summary>
@@ -78,7 +80,8 @@ namespace TreeWizard
         public readonly List<Branch> branches = new List<Branch>();
         public readonly List<Leaf> leaves = new List<Leaf>();
 
-        public static TreeSkeleton Generate(TreeDefinition def)
+        /// <param name="cells">Leaf atlas cells to pick from, or null to use the whole leaf texture.</param>
+        public static TreeSkeleton Generate(TreeDefinition def, IReadOnlyList<LeafCell> cells = null)
         {
             var skeleton = new TreeSkeleton();
             var trunk = def.trunk;
@@ -106,8 +109,9 @@ namespace TreeWizard
 
             if (def.leaves.enabled)
             {
+                var picker = new CellPicker(cells);
                 for (var b = levelStart; b < levelEnd; b++)
-                    skeleton.AddLeaves(b, def.leaves, def.seed);
+                    skeleton.AddLeaves(b, def.leaves, def.seed, picker);
             }
 
             return skeleton;
@@ -155,7 +159,7 @@ namespace TreeWizard
             }
         }
 
-        void AddLeaves(int branchIndex, LeafSettings s, int seed)
+        void AddLeaves(int branchIndex, LeafSettings s, int seed, CellPicker picker)
         {
             var branch = branches[branchIndex];
             var rng = new Rng(Rng.Combine(Rng.Combine(seed, LeafStream), branchIndex));
@@ -182,7 +186,53 @@ namespace TreeWizard
                     width = width,
                     normal = Vector3.Cross(up, width).normalized,
                     size = s.size * (1f + rng.Range(-1f, 1f) * s.sizeVariance),
+                    cell = picker.Pick(rng.Value() < s.autumn, rng.Value()),
                 });
+            }
+        }
+
+        /// <summary>Weighted choice of leaf cell, from the autumn or summer pool.</summary>
+        class CellPicker
+        {
+            readonly IReadOnlyList<LeafCell> _cells;
+            readonly List<int> _summer = new List<int>();
+            readonly List<int> _autumn = new List<int>();
+            readonly List<int> _all = new List<int>();
+
+            public CellPicker(IReadOnlyList<LeafCell> cells)
+            {
+                _cells = cells;
+                if (cells == null)
+                    return;
+                for (var i = 0; i < cells.Count; i++)
+                {
+                    if (cells[i].weight <= 0f)
+                        continue;
+                    _all.Add(i);
+                    (cells[i].autumn ? _autumn : _summer).Add(i);
+                }
+            }
+
+            /// <param name="roll">Uniform in [0, 1).</param>
+            public int Pick(bool autumn, float roll)
+            {
+                var pool = autumn ? _autumn : _summer;
+                if (pool.Count == 0)
+                    pool = _all;
+                if (pool.Count == 0)
+                    return -1;
+
+                var total = 0f;
+                foreach (var i in pool)
+                    total += _cells[i].weight;
+                var target = roll * total;
+                foreach (var i in pool)
+                {
+                    target -= _cells[i].weight;
+                    if (target < 0f)
+                        return i;
+                }
+                return pool[pool.Count - 1];
             }
         }
 

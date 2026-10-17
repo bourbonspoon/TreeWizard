@@ -10,7 +10,7 @@ namespace TreeWizardDev
     /// <summary>
     /// Renders a row of generated trees (one per seed) to a PNG, to eyeball generator changes
     /// without opening the Editor:
-    ///   Unity -batchmode -projectPath . -executeMethod TreeWizardDev.TreePreview.Render -previewOut out.png [-previewSeeds 4]
+    ///   Unity -batchmode -projectPath . -executeMethod TreeWizardDev.TreePreview.Render -previewOut out.png [-previewSeeds 4] [-previewAutumn 0.5]
     /// Don't pass -nographics; it needs a GPU.
     /// </summary>
     public static class TreePreview
@@ -18,6 +18,7 @@ namespace TreeWizardDev
         const int TileWidth = 400;
         const int Height = 600;
         const float Spacing = 7f;
+        const string OakAtlas = "Packages/com.treewizard.core/Presets/Oak/OakLeaves.asset";
 
         public static void Render()
         {
@@ -25,7 +26,9 @@ namespace TreeWizardDev
             {
                 var outPath = Arg("-previewOut") ?? "TreePreview.png";
                 var seeds = int.TryParse(Arg("-previewSeeds"), out var n) ? Mathf.Max(1, n) : 4;
-                RenderTo(outPath, seeds);
+                var autumn = float.TryParse(Arg("-previewAutumn"), System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out var a) ? a : 0f;
+                RenderTo(outPath, seeds, autumn);
                 EditorApplication.Exit(0);
             }
             catch (Exception e)
@@ -36,15 +39,23 @@ namespace TreeWizardDev
         }
 
         [MenuItem("TreeWizard/Dev/Render Preview PNG")]
-        static void RenderFromMenu() => RenderTo(Path.GetFullPath("../Scratch/TreePreview.png"), 4);
+        static void RenderFromMenu() => RenderTo(Path.GetFullPath("../Scratch/TreePreview.png"), 4, 0f);
 
-        static void RenderTo(string outPath, int seeds)
+        static void RenderTo(string outPath, int seeds, float autumn)
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             var bark = Matte(new Color(0.33f, 0.24f, 0.17f));
-            var leaf = Matte(new Color(0.22f, 0.42f, 0.14f));
             var ground = Matte(new Color(0.45f, 0.43f, 0.38f));
+            var atlas = AssetDatabase.LoadAssetAtPath<LeafAtlas>(OakAtlas);
+            var leaf = Matte(atlas != null ? Color.white : new Color(0.22f, 0.42f, 0.14f));
+            if (atlas != null)
+            {
+                leaf.SetTexture("_BaseMap", atlas.texture);
+                leaf.SetFloat("_AlphaClip", 1f);
+                leaf.SetFloat("_Cutoff", 0.5f);
+                leaf.EnableKeyword("_ALPHATEST_ON");
+            }
 
             for (var i = 0; i < seeds; i++)
             {
@@ -53,6 +64,8 @@ namespace TreeWizardDev
                 tree.definition.seed = i + 1;
                 tree.barkMaterial = bark;
                 tree.leafMaterial = leaf;
+                tree.leafAtlas = atlas;
+                tree.definition.leaves.autumn = autumn;
                 tree.Rebuild();
                 Debug.Log($"[TreePreview] seed {i + 1}: {tree.Mesh.vertexCount} verts, {tree.Mesh.triangles.Length / 3} tris");
             }

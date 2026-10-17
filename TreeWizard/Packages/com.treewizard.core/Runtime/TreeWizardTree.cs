@@ -15,6 +15,9 @@ namespace TreeWizard
         public Material barkMaterial;
         public Material leafMaterial;
 
+        [Tooltip("Where each leaf sits in the leaf material's texture. Empty maps the whole texture onto every card.")]
+        public LeafAtlas leafAtlas;
+
         Mesh _mesh;
         bool _dirty = true;
 
@@ -57,7 +60,7 @@ namespace TreeWizard
             if (_mesh == null)
                 _mesh = new Mesh { name = "TreeWizard Tree", hideFlags = HideFlags.DontSave };
 
-            TreeGenerator.Generate(definition).ApplyTo(_mesh);
+            TreeGenerator.Generate(definition, leafAtlas != null ? leafAtlas.cells : null).ApplyTo(_mesh);
             GetComponent<MeshFilter>().sharedMesh = _mesh;
             GetComponent<MeshRenderer>().sharedMaterials = new[] { barkMaterial, leafMaterial };
         }
