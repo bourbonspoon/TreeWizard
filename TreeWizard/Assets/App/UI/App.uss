@@ -96,6 +96,33 @@
   flex-grow: 1;
 }
 
+.textures__row {
+  flex-direction: row;
+  align-items: center;
+  min-height: 24px;
+}
+
+.textures__label {
+  min-width: 96px;
+}
+
+.sidebar .textures__value {
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-dim);
+}
+
+.textures__button {
+  margin-right: 0;
+}
+
+.textures__reset {
+  align-self: flex-end;
+  margin: 4px 0 0;
+}
+
 .status {
   display: none;
   position: absolute;

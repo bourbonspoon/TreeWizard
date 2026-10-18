@@ -10,6 +10,24 @@
       </ui:VisualElement>
       <ui:DropdownField name="preset" label="Preset" />
       <ui:ScrollView name="settingsScroll" class="sidebar__scroll" horizontal-scroller-visibility="Hidden">
+        <ui:Foldout name="textures" text="Textures" value="false" class="tw-settings__section">
+          <ui:VisualElement class="textures__row">
+            <ui:Label text="Bark" class="textures__label" />
+            <ui:Label name="barkValue" class="textures__value" />
+            <ui:Button name="barkButton" text="Choose…" tooltip="A tiling bark photo (PNG or JPG). A normal map is made from it." class="textures__button" />
+          </ui:VisualElement>
+          <ui:VisualElement class="textures__row">
+            <ui:Label text="Bark Normal" class="textures__label" />
+            <ui:Label name="barkNormalValue" class="textures__value" />
+            <ui:Button name="barkNormalButton" text="Choose…" tooltip="Your own normal map for the bark, OpenGL style (green up). Choose the bark first." class="textures__button" />
+          </ui:VisualElement>
+          <ui:VisualElement class="textures__row">
+            <ui:Label text="Leaves" class="textures__label" />
+            <ui:Label name="leavesValue" class="textures__value" />
+            <ui:Button name="leavesButton" text="Choose…" tooltip="One or more PNG sheets of leaves or twigs on a transparent background, stems pointing down. Each one becomes its own card." class="textures__button" />
+          </ui:VisualElement>
+          <ui:Button name="presetTexturesButton" text="Use Preset Textures" class="textures__reset" />
+        </ui:Foldout>
         <ui:VisualElement name="settings" />
       </ui:ScrollView>
       <ui:Slider name="wind" label="Wind" low-value="0" high-value="2" show-input-field="true" class="sidebar__wind" />

@@ -59,10 +59,17 @@ namespace TreeWizard
 
                     // An imported normal map is GPU-compressed with swizzled channels, so rather than copy
                     // it back out, rebuild it from the colour texture the way the presets' maps were made.
-                    if (source.HasProperty("_BumpMap") && source.GetTexture("_BumpMap") != null)
+                    // One made at runtime (TextureImport) is plain readable pixels, which are kept as they are.
+                    var bump = source.HasProperty("_BumpMap") ? source.GetTexture("_BumpMap") : null;
+                    if (bump != null)
                     {
-                        var normals = new Texture2D(albedo.width, albedo.height, TextureFormat.RGB24, false);
-                        normals.SetPixels32(NormalMapGenerator.FromAlbedo(albedo.GetPixels32(), albedo.width, albedo.height));
+                        var runtimeMap = bump is Texture2D map && map.isReadable ? map : null;
+                        var normals = runtimeMap != null
+                            ? new Texture2D(runtimeMap.width, runtimeMap.height, TextureFormat.RGB24, false)
+                            : new Texture2D(albedo.width, albedo.height, TextureFormat.RGB24, false);
+                        normals.SetPixels32(runtimeMap != null
+                            ? runtimeMap.GetPixels32()
+                            : NormalMapGenerator.FromAlbedo(albedo.GetPixels32(), albedo.width, albedo.height));
                         var normalFile = name + "_Normal.png";
                         File.WriteAllBytes(Path.Combine(directory, normalFile), normals.EncodeToPNG());
                         Object.DestroyImmediate(normals);

@@ -27,13 +27,18 @@ namespace TreeWizard.App
         static readonly float[] ZoomSteps = { 0.75f, 0.9f, 1f, 1.1f, 1.25f, 1.5f, 1.75f, 2f };
         static FileFilter DesignFilter => new FileFilter("Designs", TreeDesignFile.Extension);
         static FileFilter FbxFilter => new FileFilter("FBX", ".fbx");
+        static FileFilter ImageFilter => new FileFilter("Images", TextureImport.Extensions);
 
         TreeSettingsPanel _settings;
         DropdownField _preset;
         Label _stats;
         Label _status;
         FileBrowser _browser;
+        CustomTextures _textures;
+        Label _barkValue, _barkNormalValue, _leavesValue;
+        Button _barkNormalButton;
         string _folder;
+        string _textureFolder;
         string _designName = "Tree";
         float _statusUntil;
         int _shownTriangles = -1;
@@ -75,6 +80,18 @@ namespace TreeWizard.App
             _stats = root.Q<Label>("stats");
             _status = root.Q<Label>("status");
 
+            _textures = new CustomTextures(tree);
+            _textures.Changed += ShowTextures;
+            _barkValue = root.Q<Label>("barkValue");
+            _barkNormalValue = root.Q<Label>("barkNormalValue");
+            _leavesValue = root.Q<Label>("leavesValue");
+            _barkNormalButton = root.Q<Button>("barkNormalButton");
+            root.Q<Button>("barkButton").clicked += ChooseBark;
+            _barkNormalButton.clicked += ChooseBarkNormal;
+            root.Q<Button>("leavesButton").clicked += ChooseLeaves;
+            root.Q<Button>("presetTexturesButton").clicked += () => _textures.Clear();
+            ShowTextures();
+
             _browser = new FileBrowser();
             _browser.SetRecentFolders(PlayerPrefs.GetString(RecentFoldersKey, "").Split('\n'));
             _browser.RecentFoldersChanged += () => PlayerPrefs.SetString(RecentFoldersKey, string.Join("\n", _browser.RecentFolders));
@@ -86,6 +103,8 @@ namespace TreeWizard.App
                 _settings.Definition = tree.definition;
         }
 
+        void OnDisable() => _textures?.Dispose();
+
         void Start()
         {
             FrameTree();
@@ -96,10 +115,12 @@ namespace TreeWizard.App
 
         /// <summary>
         /// Automated check for builds: TreeWizard -smokeTest &lt;folder&gt; screenshots each preset, saves a
-        /// design and exports FBX into the folder, screenshots the file browser, then quits with exit code 0, or 1 on any error.
+        /// design and exports FBX into the folder, does the same with generated custom textures, screenshots the file browser,
+        /// then quits with exit code 0, or 1 on any error.
         /// </summary>
         IEnumerator SmokeTest(string folder)
         {
+            folder = Path.GetFullPath(folder);
             Directory.CreateDirectory(folder);
             var failed = false;
             Application.logMessageReceived += (message, stack, type) =>
@@ -117,7 +138,7 @@ namespace TreeWizard.App
                 yield return new WaitForSeconds(0.5f); // the capture happens at the end of a frame
                 try
                 {
-                    TreeDesignFile.Save(Path.Combine(folder, presets[i].name + TreeDesignFile.Extension), _preset.value, tree.definition);
+                    TreeDesignFile.Save(Path.Combine(folder, presets[i].name + TreeDesignFile.Extension), _preset.value, tree.definition, _textures.Files);
                     TreeFbxExporter.Export(tree, Path.Combine(folder, presets[i].name + ".fbx"));
                 }
                 catch (Exception e)
@@ -125,6 +146,36 @@ namespace TreeWizard.App
                     Debug.LogException(e);
                 }
             }
+
+            var barkPath = Path.Combine(folder, "SmokeBark.png");
+            var sheetPath = Path.Combine(folder, "SmokeLeaves.png");
+            WriteSmokeImages(barkPath, sheetPath);
+            yield return Wait(_textures.SetBark(barkPath));
+            yield return Wait(_textures.SetLeaves(new[] { sheetPath }));
+            ShowTextures();
+            GetComponent<UIDocument>().rootVisualElement.Q<Foldout>("textures").value = true;
+            yield return new WaitForSeconds(1f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "CustomTextures.png"));
+            yield return new WaitForSeconds(0.5f);
+            try
+            {
+                var design = Path.Combine(folder, "Custom" + TreeDesignFile.Extension);
+                TreeDesignFile.Save(design, _preset.value, tree.definition, _textures.Files);
+                if (!File.ReadAllText(design).Contains("\"bark\": \"SmokeBark.png\""))
+                    Debug.LogError("[SmokeTest] the bark path wasn't stored relative to the design");
+                var loaded = TreeDesignFile.Load(design).textures;
+                if (loaded.bark != barkPath || loaded.leafSheets.SingleOrDefault() != sheetPath)
+                    Debug.LogError($"[SmokeTest] texture paths didn't survive saving: {loaded.bark}, {string.Join(", ", loaded.leafSheets)}");
+                TreeFbxExporter.Export(tree, Path.Combine(folder, "Custom.fbx"));
+                if (!File.Exists(Path.Combine(folder, "Custom_Bark_Normal.png")))
+                    Debug.LogError("[SmokeTest] no bark normal map was exported");
+                Debug.Log($"[SmokeTest] custom textures: {tree.leafAtlas.cells.Count} leaves, {tree.barkMaterial.mainTexture.width}px bark");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            _textures.Clear();
 
             _browser.SaveFile("Save Design", folder, "Smoke" + TreeDesignFile.Extension, new[] { DesignFilter }, _ => { });
             yield return new WaitForSeconds(1f);
@@ -134,6 +185,50 @@ namespace TreeWizard.App
 
             Debug.Log(failed ? "[SmokeTest] FAILED" : "[SmokeTest] passed");
             Application.Quit(failed ? 1 : 0);
+        }
+
+        static IEnumerator Wait(System.Threading.Tasks.Task task)
+        {
+            while (!task.IsCompleted)
+                yield return null;
+            if (task.IsFaulted)
+                Debug.LogException(task.Exception);
+        }
+
+        // A stripy bark tile, and a sheet of two green leaves and an orange one with their stems pointing down.
+        static void WriteSmokeImages(string barkPath, string sheetPath)
+        {
+            var bark = new Texture2D(256, 256, TextureFormat.RGBA32, false);
+            var pixels = new Color32[256 * 256];
+            for (var y = 0; y < 256; y++)
+            for (var x = 0; x < 256; x++)
+            {
+                var v = (byte)(100 + 60 * Mathf.Sin(x * 0.2f + Mathf.Sin(y * 0.05f) * 3f));
+                pixels[y * 256 + x] = new Color32(v, (byte)(v * 0.8f), (byte)(v * 0.6f), 255);
+            }
+            bark.SetPixels32(pixels);
+            File.WriteAllBytes(barkPath, bark.EncodeToPNG());
+            Destroy(bark);
+
+            const int w = 384, h = 256;
+            var sheet = new Texture2D(w, h, TextureFormat.RGBA32, false);
+            pixels = new Color32[w * h];
+            var colours = new[] { new Color32(60, 140, 40, 255), new Color32(80, 150, 50, 255), new Color32(200, 110, 30, 255) };
+            for (var leaf = 0; leaf < 3; leaf++)
+            {
+                var cx = 64 + leaf * 128;
+                for (var y = 0; y < h; y++)
+                for (var x = 0; x < w; x++)
+                {
+                    float dx = (x - cx) / 44f, dy = (y - 150) / 90f;
+                    var stem = Mathf.Abs(x - cx) <= 2 && y >= 20 && y < 70;
+                    if (dx * dx + dy * dy <= 1f || stem)
+                        pixels[y * w + x] = colours[leaf];
+                }
+            }
+            sheet.SetPixels32(pixels);
+            File.WriteAllBytes(sheetPath, sheet.EncodeToPNG());
+            Destroy(sheet);
         }
 
         static string Arg(string name)
@@ -200,9 +295,9 @@ namespace TreeWizard.App
             if (index < 0 || index >= presets.Count)
                 return;
             tree.ApplyPreset(presets[index]);
+            _textures.Apply(presets[index]); // keeps the person's own textures over the new preset, and rebuilds
             _settings.Definition = tree.definition;
             _designName = presets[index].name;
-            tree.Rebuild();
             FrameTree();
         }
 
@@ -215,7 +310,7 @@ namespace TreeWizard.App
         void Save() =>
             _browser.SaveFile("Save Design", DefaultFolder(), _designName + TreeDesignFile.Extension, new[] { DesignFilter }, path =>
             {
-                TreeDesignFile.Save(path, _preset.value, tree.definition);
+                TreeDesignFile.Save(path, _preset.value, tree.definition, _textures.Files);
                 Remember(path);
                 ShowStatus($"Saved {Path.GetFileName(path)}");
             });
@@ -228,14 +323,114 @@ namespace TreeWizard.App
                 if (index >= 0)
                     _preset.SetValueWithoutNotify(presets[index].name);
                 var preset = index >= 0 ? presets[index] : presets.FirstOrDefault();
+                _textures.Clear();
                 if (preset != null)
                     tree.ApplyPreset(preset); // materials and leaf atlas
                 tree.definition = design.definition;
+                _textures.Apply(preset);
                 tree.MarkDirty();
                 _settings.Definition = tree.definition;
                 Remember(path);
-                ShowStatus($"Opened {Path.GetFileName(path)}");
+                LoadTextures(design.textures, $"Opened {Path.GetFileName(path)}");
             });
+
+        // A design's own textures. Missing files fall back to the preset's, and the status says which.
+        async void LoadTextures(TreeDesignFile.TextureFiles files, string opened)
+        {
+            var missing = new List<string>();
+            try
+            {
+                if (!string.IsNullOrEmpty(files.bark))
+                {
+                    if (File.Exists(files.bark))
+                    {
+                        var normal = files.barkNormal;
+                        if (!string.IsNullOrEmpty(normal) && !File.Exists(normal))
+                        {
+                            missing.Add(Path.GetFileName(normal));
+                            normal = "";
+                        }
+                        await _textures.SetBark(files.bark, normal);
+                    }
+                    else
+                    {
+                        missing.Add(Path.GetFileName(files.bark));
+                    }
+                }
+                var sheets = files.leafSheets.Where(File.Exists).ToList();
+                missing.AddRange(files.leafSheets.Where(p => !File.Exists(p)).Select(Path.GetFileName));
+                if (sheets.Count > 0)
+                    await _textures.SetLeaves(sheets);
+                ShowStatus(missing.Count == 0 ? opened : $"{opened}, but couldn't find {string.Join(", ", missing)}; using the preset's textures instead", missing.Count == 0 ? 5f : 10f);
+            }
+            catch (Exception e)
+            {
+                ShowStatus($"{opened}, but its textures couldn't be loaded: {e.Message}", 10f);
+            }
+        }
+
+        void ChooseBark() =>
+            _browser.OpenFile("Choose Bark Texture", TextureFolder(), new[] { ImageFilter, FileFilter.All }, path =>
+            {
+                _textureFolder = Path.GetDirectoryName(path);
+                RunTextureTask(_textures.SetBark(path), "Making the bark normal map…", () => $"Bark: {Path.GetFileName(path)}");
+            });
+
+        void ChooseBarkNormal() =>
+            _browser.OpenFile("Choose Bark Normal Map", TextureFolder(), new[] { ImageFilter, FileFilter.All }, path =>
+            {
+                _textureFolder = Path.GetDirectoryName(path);
+                RunTextureTask(_textures.SetBark(_textures.BarkPath, path), "Loading the normal map…", () => $"Bark normal map: {Path.GetFileName(path)}");
+            });
+
+        void ChooseLeaves() =>
+            _browser.OpenFiles("Choose Leaf Sheets", TextureFolder(), new[] { ImageFilter, FileFilter.All }, paths =>
+            {
+                _textureFolder = Path.GetDirectoryName(paths[0]);
+                var task = _textures.SetLeaves(paths);
+                RunTextureTask(task, "Finding the leaves…", () =>
+                {
+                    var (leaves, opaque) = task.Result;
+                    var message = $"{leaves} leaves from {paths.Length} {(paths.Length == 1 ? "sheet" : "sheets")}";
+                    return opaque.Length == 0 ? message : $"{message}. No transparent background on {string.Join(", ", opaque)}, so each became one leaf";
+                });
+            });
+
+        async void RunTextureTask(System.Threading.Tasks.Task task, string working, Func<string> done)
+        {
+            ShowStatus(working, float.PositiveInfinity);
+            try
+            {
+                await task;
+                ShowStatus(done(), 8f);
+            }
+            catch (Exception e)
+            {
+                ShowStatus($"Couldn't use that image: {e.Message}", 10f);
+            }
+        }
+
+        void ShowTextures()
+        {
+            Show(_barkValue, _textures.HasBark ? Path.GetFileName(_textures.BarkPath) : "Preset", _textures.BarkPath);
+            Show(_barkNormalValue,
+                !_textures.HasBark ? "Preset"
+                : string.IsNullOrEmpty(_textures.BarkNormalPath) ? "Generated"
+                : Path.GetFileName(_textures.BarkNormalPath), _textures.BarkNormalPath);
+            _barkNormalButton.SetEnabled(_textures.HasBark);
+            var sheets = _textures.LeafSheetPaths;
+            Show(_leavesValue, !_textures.HasLeaves ? "Preset" : sheets.Count == 1 ? Path.GetFileName(sheets[0]) : $"{sheets.Count} sheets",
+                string.Join("\n", sheets));
+
+            static void Show(Label label, string text, string tooltip)
+            {
+                label.text = text;
+                label.tooltip = tooltip;
+            }
+        }
+
+        // The folder images last came from, else where designs are kept.
+        string TextureFolder() => _textureFolder ?? DefaultFolder();
 
         void Export() =>
             _browser.SaveFile("Export FBX", DefaultFolder(), _designName + ".fbx", new[] { FbxFilter }, path =>
@@ -265,11 +460,11 @@ namespace TreeWizard.App
             _designName = Path.GetFileNameWithoutExtension(path);
         }
 
-        void ShowStatus(string message)
+        void ShowStatus(string message, float seconds = 5f)
         {
             _status.text = message;
             _status.AddToClassList("status--visible");
-            _statusUntil = Time.unscaledTime + 5f;
+            _statusUntil = Time.unscaledTime + seconds;
         }
 
         /// <summary>True while a text or number field has focus, so typing doesn't trigger shortcuts.</summary>
