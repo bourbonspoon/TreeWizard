@@ -21,5 +21,14 @@ namespace TreeWizard.Editor
             tree.Rebuild();
             Selection.activeGameObject = go;
         }
+
+        [MenuItem("GameObject/TreeWizard/Wind", false, 21)]
+        static void CreateWind(MenuCommand command)
+        {
+            var go = ObjectFactory.CreateGameObject("Wind", typeof(TreeWizardWind));
+            ObjectFactory.PlaceGameObject(go, command.context as GameObject);
+            go.transform.rotation = Quaternion.Euler(0f, 45f, 0f);
+            Selection.activeGameObject = go;
+        }
     }
 }

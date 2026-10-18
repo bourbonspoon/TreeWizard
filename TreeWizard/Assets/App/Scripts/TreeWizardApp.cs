@@ -18,6 +18,7 @@ namespace TreeWizard.App
     {
         [SerializeField] TreeWizardTree tree;
         [SerializeField] OrbitCamera orbit;
+        [SerializeField] TreeWizardWind wind;
         [SerializeField] List<TreePreset> presets = new List<TreePreset>();
 
         TreeSettingsPanel _settings;
@@ -46,6 +47,16 @@ namespace TreeWizard.App
             root.Q<Button>("openButton").clicked += Open;
             root.Q<Button>("saveButton").clicked += Save;
             root.Q<Button>("exportButton").clicked += Export;
+            var windSlider = root.Q<Slider>("wind");
+            if (wind != null)
+            {
+                windSlider.SetValueWithoutNotify(wind.strength);
+                windSlider.RegisterValueChangedCallback(e => wind.strength = e.newValue);
+            }
+            else
+            {
+                windSlider.SetEnabled(false);
+            }
             _stats = root.Q<Label>("stats");
             _status = root.Q<Label>("status");
 

@@ -113,8 +113,8 @@ namespace TreeWizardDev
             Directory.CreateDirectory(dir);
             var atlas = BuildAtlas(species, $"{dir}/{species.Name}Leaves.asset");
             var barkTexture = BuildBark(species, $"{dir}/{species.Name}Bark.jpg", $"{dir}/{species.Name}BarkNormal.png", out var barkNormal);
-            var bark = Lit($"{dir}/{species.Name}Bark.mat", barkTexture, false, barkNormal);
-            var leaves = Lit($"{dir}/{species.Name}Leaves.mat", atlas.texture, true);
+            var bark = TreeMaterial($"{dir}/{species.Name}Bark.mat", barkTexture, false, barkNormal);
+            var leaves = TreeMaterial($"{dir}/{species.Name}Leaves.mat", atlas.texture, true);
 
             var path = $"{dir}/{species.Name}.asset";
             var preset = AssetDatabase.LoadAssetAtPath<TreePreset>(path);
@@ -190,31 +190,43 @@ namespace TreeWizardDev
         static IEnumerable<string> SourceFiles() =>
             Directory.Exists(RawTextures) ? Directory.GetFiles(RawTextures, "*.png") : Enumerable.Empty<string>();
 
-        /// <summary>URP Lit material; alpha-clipped for leaves.</summary>
-        static Material Lit(string path, Texture2D texture, bool cutout, Texture2D normalMap = null)
+        const string TreeShader = "Packages/com.treewizard.core/Shaders/Tree.shadergraph";
+
+        /// <summary>A TreeWizard/Tree material (URP Lit plus wind). Leaves are alpha-clipped and flutter.</summary>
+        static Material TreeMaterial(string path, Texture2D texture, bool leaves, Texture2D normalMap = null)
         {
+            var shader = AssetDatabase.LoadAssetAtPath<Shader>(TreeShader);
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (material == null)
             {
-                material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                material = new Material(shader);
                 AssetDatabase.CreateAsset(material, path);
             }
+            else if (material.shader != shader)
+            {
+                material.shader = shader;
+            }
+
             material.SetColor("_BaseColor", texture != null ? Color.white : new Color(0.36f, 0.27f, 0.2f));
             material.SetTexture("_BaseMap", texture);
-            material.SetFloat("_Smoothness", 0.15f);
             material.SetTexture("_BumpMap", normalMap);
             material.SetFloat("_BumpScale", 1f);
-            if (normalMap != null)
-                material.EnableKeyword("_NORMALMAP");
-            else
-                material.DisableKeyword("_NORMALMAP");
-            if (cutout)
+            material.SetFloat("_Smoothness", 0.15f);
+            material.SetFloat("_WindStrength", 1f);
+            material.SetFloat("_WindFlutter", leaves ? 1f : 0f);
+            material.SetFloat("_AlphaClip", leaves ? 1f : 0f);
+            material.SetFloat("_Cutoff", 0.5f);
+            if (leaves)
             {
-                material.SetFloat("_AlphaClip", 1f);
-                material.SetFloat("_Cutoff", 0.5f);
                 material.EnableKeyword("_ALPHATEST_ON");
                 material.SetOverrideTag("RenderType", "TransparentCutout");
                 material.renderQueue = (int)RenderQueue.AlphaTest;
+            }
+            else
+            {
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.SetOverrideTag("RenderType", "Opaque");
+                material.renderQueue = (int)RenderQueue.Geometry;
             }
             EditorUtility.SetDirty(material);
             return material;

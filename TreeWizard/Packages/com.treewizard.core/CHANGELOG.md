@@ -23,4 +23,6 @@ All notable changes to this package are documented here. The format follows [Kee
 - `TreeWizard.Fbx`: a standalone, engine-free binary FBX 7.4 writer (static meshes, materials, textures, model hierarchy), checked against Unity's and Blender's importers.
 - Export FBX: `TreeFbxExporter` (works in the Editor and in builds) and an **Export FBX…** inspector button. Textures are saved as PNGs beside the file.
 - `TreeSettingsPanel`: runtime UI Toolkit editor for tree settings, generated from the same attributes as the inspector, for building tree editing into apps.
+- `TreeWizard/Tree` shader (URP Shader Graph): Lit surface plus wind (trunk sway that grows with height, branch bob, leaf flutter). Wind works from object-space position, so baked prefabs and imported FBX trees sway too. Presets use it.
+- `TreeWizardWind` component (GameObject > TreeWizard > Wind): sets wind direction, strength and speed for all trees, optionally following a WindZone.
 - Bake to Prefab writes a static prefab with the mesh embedded; re-baking updates the mesh in place so existing references keep working.

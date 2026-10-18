@@ -12,6 +12,7 @@
       <ui:ScrollView name="settingsScroll" class="sidebar__scroll" horizontal-scroller-visibility="Hidden">
         <ui:VisualElement name="settings" />
       </ui:ScrollView>
+      <ui:Slider name="wind" label="Wind" low-value="0" high-value="2" show-input-field="true" class="sidebar__wind" />
       <ui:Label name="stats" class="sidebar__stats" />
     </ui:VisualElement>
     <ui:Label name="status" class="status" picking-mode="Ignore" />

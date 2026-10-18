@@ -44,6 +44,9 @@ namespace TreeWizardDev
             ground.GetComponent<MeshRenderer>().sharedMaterial = GroundMaterial();
             Object.DestroyImmediate(ground.GetComponent<Collider>());
 
+            var wind = new GameObject("Wind").AddComponent<TreeWizardWind>();
+            wind.transform.rotation = Quaternion.Euler(0f, 45f, 0f);
+
             var tree = new GameObject("Tree").AddComponent<TreeWizardTree>();
             var oak = AssetDatabase.LoadAssetAtPath<TreePreset>(TreeWizardMenus.DefaultPreset);
             tree.ApplyPreset(oak);
@@ -65,6 +68,7 @@ namespace TreeWizardDev
             var so = new SerializedObject(app);
             so.FindProperty("tree").objectReferenceValue = tree;
             so.FindProperty("orbit").objectReferenceValue = orbit;
+            so.FindProperty("wind").objectReferenceValue = wind;
             var presets = so.FindProperty("presets");
             var all = FindPresets();
             presets.arraySize = all.Count;

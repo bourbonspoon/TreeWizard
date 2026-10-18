@@ -56,6 +56,10 @@
   margin-top: 8px;
 }
 
+.sidebar__wind {
+  margin-top: 8px;
+}
+
 .sidebar__stats {
   margin-top: 8px;
   color: var(--text-dim);
