@@ -23,6 +23,8 @@ namespace TreeWizard.App
         [SerializeField] List<TreePreset> presets = new List<TreePreset>();
 
         const string RecentFoldersKey = "TreeWizard.RecentFolders";
+        const string ZoomKey = "TreeWizard.Zoom";
+        static readonly float[] ZoomSteps = { 0.75f, 0.9f, 1f, 1.1f, 1.25f, 1.5f, 1.75f, 2f };
         static FileFilter DesignFilter => new FileFilter("Designs", TreeDesignFile.Extension);
         static FileFilter FbxFilter => new FileFilter("FBX", ".fbx");
 
@@ -35,11 +37,19 @@ namespace TreeWizard.App
         string _designName = "Tree";
         float _statusUntil;
         int _shownTriangles = -1;
+        PanelSettings _panel;
+        float _zoom = 1f;
+        float _nextScaleCheck;
 
         void OnEnable()
         {
             _folder = Path.Combine(Places.Documents, "TreeWizard");
-            var root = GetComponent<UIDocument>().rootVisualElement;
+            var document = GetComponent<UIDocument>();
+            _panel = document.panelSettings = Instantiate(document.panelSettings); // scaled at runtime, so the asset stays untouched
+            _panel.scaleMode = PanelScaleMode.ConstantPixelSize;
+            _zoom = Mathf.Clamp(PlayerPrefs.GetFloat(ZoomKey, 1f), ZoomSteps[0], ZoomSteps[ZoomSteps.Length - 1]);
+            UpdateScale();
+            var root = document.rootVisualElement;
 
             _settings = new TreeSettingsPanel();
             _settings.Changed += tree.MarkDirty;
@@ -98,6 +108,7 @@ namespace TreeWizard.App
                     failed = true;
             };
 
+            Debug.Log($"[SmokeTest] UI scale {_panel.scale} (display {DisplayScale.System}, zoom {_zoom}), Screen.dpi {Screen.dpi}, window {Screen.width}x{Screen.height}");
             for (var i = 0; i < presets.Count; i++)
             {
                 _preset.index = i;
@@ -146,8 +157,42 @@ namespace TreeWizard.App
                 _status.RemoveFromClassList("status--visible");
                 _statusUntil = 0f;
             }
-            if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame && !_browser.IsOpen && !IsTyping())
+            if (Time.unscaledTime > _nextScaleCheck)
+                UpdateScale(); // the window can move to a screen with a different scale
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+                return;
+            if (keyboard.fKey.wasPressedThisFrame && !_browser.IsOpen && !IsTyping())
                 FrameTree();
+            if (keyboard.leftCommandKey.isPressed || keyboard.rightCommandKey.isPressed || keyboard.ctrlKey.isPressed)
+            {
+                if (keyboard.equalsKey.wasPressedThisFrame || keyboard.numpadPlusKey.wasPressedThisFrame)
+                    Zoom(1);
+                else if (keyboard.minusKey.wasPressedThisFrame || keyboard.numpadMinusKey.wasPressedThisFrame)
+                    Zoom(-1);
+                else if (keyboard.digit0Key.wasPressedThisFrame || keyboard.numpad0Key.wasPressedThisFrame)
+                    Zoom(0);
+            }
+        }
+
+        // Cmd/Ctrl + and - step through ZoomSteps, 0 goes back to 100%.
+        void Zoom(int direction)
+        {
+            var index = Array.FindIndex(ZoomSteps, z => z >= _zoom - 0.001f);
+            if (index < 0)
+                index = ZoomSteps.Length - 1;
+            _zoom = direction == 0 ? 1f : ZoomSteps[Mathf.Clamp(index + direction, 0, ZoomSteps.Length - 1)];
+            PlayerPrefs.SetFloat(ZoomKey, _zoom);
+            UpdateScale();
+            ShowStatus($"UI size {_zoom:P0}");
+        }
+
+        void UpdateScale()
+        {
+            _nextScaleCheck = Time.unscaledTime + 0.5f;
+            var scale = DisplayScale.System * _zoom;
+            if (!Mathf.Approximately(_panel.scale, scale))
+                _panel.scale = scale;
         }
 
         void ApplyPreset(int index)
