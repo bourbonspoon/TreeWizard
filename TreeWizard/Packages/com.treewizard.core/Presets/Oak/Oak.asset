@@ -55,6 +55,8 @@ MonoBehaviour:
       sizeVariance: 0.3
       angle: 45
       shape: 0
+      outward: 0.5
+      canopyNormals: 0.6
       autumn: 0
     mesh:
       radialSegments: 8

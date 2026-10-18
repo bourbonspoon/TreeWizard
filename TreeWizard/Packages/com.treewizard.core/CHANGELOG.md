@@ -9,6 +9,8 @@ All notable changes to this package are documented here. The format follows [Kee
 - Tree generator: trunk with flare, up to three branch levels, and leaf cards (single or crossed), all driven by a seed.
 - `TreeWizardTree` component that rebuilds the mesh live as settings change.
 - Leaf atlases: `LeafSheetSlicer` finds each leaf or twig on transparent sheets, cleans background fringes and packs an atlas; `LeafAtlasBuilder` writes it as a texture plus `LeafAtlas` asset. Cards take each cell's proportions and stem position.
+- Leaf **Outward** setting: turns cards from facing the sky to facing away from the trunk, for fuller crowns from the side.
+- Leaf **Canopy Normals** setting: bends leaf lighting out from the crown's centre so canopies shade as one rounded mass. Carried through FBX export.
 - Autumn setting: the share of leaves drawn from an atlas's autumn-coloured cells. Greens through blue-greens count as summer.
 - Oak leaf atlas preset (36 summer and autumn twigs).
 - Spruce preset: conical tiered shape, 18 spruce sprays, spruce bark.

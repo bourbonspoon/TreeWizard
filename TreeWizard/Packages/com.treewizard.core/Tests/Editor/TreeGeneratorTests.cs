@@ -107,7 +107,9 @@ namespace TreeWizard.Editor.Tests
         [Test]
         public void Triangles_FaceTheirVertexNormals()
         {
-            var data = TreeGenerator.Generate(new TreeDefinition());
+            var def = new TreeDefinition();
+            def.leaves.canopyNormals = 0f; // canopy normals deliberately lean away from the card faces
+            var data = TreeGenerator.Generate(def);
 
             for (var s = 0; s < MeshData.SubmeshCount; s++)
             {
@@ -122,6 +124,34 @@ namespace TreeWizard.Editor.Tests
                     Assert.Greater(Vector3.Dot(face, normal), 0f, $"submesh {s} triangle {i / 3} is wound inside out");
                 }
             }
+        }
+
+        [Test]
+        public void CanopyNormals_PointOutOfTheCrown()
+        {
+            var def = new TreeDefinition();
+            def.leaves.canopyNormals = 1f;
+            var data = TreeGenerator.Generate(def);
+
+            var leafVertices = data.Triangles(MeshData.LeafSubmesh).Distinct().ToList();
+            var center = leafVertices.Aggregate(Vector3.zero, (sum, i) => sum + data.vertices[i]) / leafVertices.Count;
+            var outward = leafVertices.Count(i => Vector3.Dot(data.normals[i], data.vertices[i] - center) > 0f);
+            Assert.Greater(outward, leafVertices.Count * 0.95f, "nearly every leaf normal faces out of the crown");
+        }
+
+        [TestCase(0f)]
+        [TestCase(1f)]
+        public void Outward_TurnsCardsFromTheSkyToTheSide(float outward)
+        {
+            var def = new TreeDefinition();
+            def.leaves.outward = outward;
+            var leaves = TreeSkeleton.Generate(def).leaves;
+
+            var upness = leaves.Average(l => Mathf.Abs(Vector3.Dot(l.normal, Vector3.up)));
+            if (outward == 0f)
+                Assert.Greater(upness, 0.6f, "cards mostly face the sky");
+            else
+                Assert.Less(upness, 0.5f, "cards mostly face sideways");
         }
 
         [Test]

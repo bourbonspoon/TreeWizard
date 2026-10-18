@@ -173,8 +173,10 @@ namespace TreeWizard
                 var azimuth = azimuthOffset + i * GoldenAngle + rng.Range(-15f, 15f);
                 var up = AwayFrom(at, azimuth, s.angle + rng.Range(-15f, 15f));
 
-                // Lay the card so its face points roughly skywards, then roll it a little.
-                var width = Vector3.Cross(Vector3.up, up);
+                // Turn the card to face somewhere between the sky and away from the trunk, then roll it a little.
+                var away = new Vector3(at.position.x, 0f, at.position.z);
+                var facing = Vector3.Lerp(Vector3.up, away.sqrMagnitude > 1e-6f ? away.normalized : Vector3.up, s.outward);
+                var width = Vector3.Cross(facing, up); // makes the card normal, cross(up, width), point along facing
                 if (width.sqrMagnitude < 1e-4f)
                     width = Vector3.Cross(Vector3.right, up);
                 width = Quaternion.AngleAxis(rng.Range(-30f, 30f), up) * width.normalized;

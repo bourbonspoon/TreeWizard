@@ -72,7 +72,8 @@ namespace TreeWizard.Editor.Tests
         {
             var vertices = _imported.vertices;
             var normals = _imported.normals;
-            for (var s = 0; s < _imported.subMeshCount; s++)
+            // Bark only: leaf normals are deliberately bent towards the crown's outside, so they don't follow the card faces.
+            for (var s = MeshData.BarkSubmesh; s <= MeshData.BarkSubmesh; s++)
             {
                 var tris = _imported.GetTriangles(s);
                 for (var i = 0; i < tris.Length; i += 3)

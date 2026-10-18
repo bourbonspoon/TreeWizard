@@ -81,6 +81,7 @@ namespace TreeWizardDev
             leaves = new LeafSettings
             {
                 count = 5, start = 0.05f, size = 0.62f, sizeVariance = 0.25f, angle = 25f,
+                outward = 0.2f, // conifer sprays lie mostly flat, which gives the layered look
             },
             mesh = new MeshSettings { radialSegments = 8, minRadialSegments = 3 },
         };

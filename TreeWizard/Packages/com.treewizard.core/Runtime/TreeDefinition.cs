@@ -133,6 +133,12 @@ namespace TreeWizard
 
         public LeafShape shape = LeafShape.Quad;
 
+        [Tooltip("0: cards face the sky. 1: cards face away from the trunk, which looks fuller from the side.")]
+        [Range(0f, 1f)] public float outward = 0.5f;
+
+        [Tooltip("Bends leaf lighting outward from the crown's centre, so the canopy shades as one rounded mass instead of flat cards.")]
+        [Range(0f, 1f)] public float canopyNormals = 0.6f;
+
         [Tooltip("Share of leaves using the leaf atlas's autumn cells.")]
         [Range(0f, 1f)] public float autumn;
     }
