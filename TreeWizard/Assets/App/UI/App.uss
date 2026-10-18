@@ -67,8 +67,7 @@
 }
 
 .sidebar .unity-label,
-.sidebar .unity-foldout__text,
-.file-dialog .unity-label {
+.sidebar .unity-foldout__text {
   color: var(--text);
 }
 
@@ -110,80 +109,4 @@
 
 .status--visible {
   display: flex;
-}
-
-.file-dialog {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.file-dialog--hidden {
-  display: none;
-}
-
-.file-dialog__window {
-  width: 640px;
-  height: 70%;
-  padding: 16px;
-  border-radius: 6px;
-  background-color: var(--window-bg);
-}
-
-.file-dialog__title {
-  font-size: 16px;
-  -unity-font-style: bold;
-  margin-bottom: 8px;
-}
-
-.file-dialog__row {
-  flex-direction: row;
-}
-
-.file-dialog__folder {
-  flex-grow: 1;
-}
-
-.file-dialog__list {
-  flex-grow: 1;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  background-color: rgba(0, 0, 0, 0.25);
-}
-
-.file-dialog__entry {
-  margin: 0;
-  border-width: 0;
-  border-radius: 0;
-  -unity-text-align: middle-left;
-  background-color: rgba(0, 0, 0, 0);
-  color: var(--text);
-}
-
-.file-dialog__entry:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.file-dialog__entry--folder {
-  -unity-font-style: bold;
-}
-
-.file-dialog__error {
-  min-height: 18px;
-  color: rgb(255, 138, 128);
-}
-
-.file-dialog__buttons {
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
-.file-dialog__confirm {
-  background-color: var(--accent);
-  color: rgb(255, 255, 255);
 }

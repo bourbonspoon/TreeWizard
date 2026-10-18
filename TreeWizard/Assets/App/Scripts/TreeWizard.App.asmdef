@@ -1,6 +1,6 @@
 {
     "name": "TreeWizard.App",
     "rootNamespace": "TreeWizard.App",
-    "references": ["TreeWizard.Runtime", "Unity.InputSystem"],
+    "references": ["TreeWizard.Runtime", "TreeWizard.FileBrowser", "Unity.InputSystem"],
     "autoReferenced": true
 }

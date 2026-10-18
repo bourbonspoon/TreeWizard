@@ -22,11 +22,15 @@ namespace TreeWizard.App
         [SerializeField] TreeWizardWind wind;
         [SerializeField] List<TreePreset> presets = new List<TreePreset>();
 
+        const string RecentFoldersKey = "TreeWizard.RecentFolders";
+        static FileFilter DesignFilter => new FileFilter("Designs", TreeDesignFile.Extension);
+        static FileFilter FbxFilter => new FileFilter("FBX", ".fbx");
+
         TreeSettingsPanel _settings;
         DropdownField _preset;
         Label _stats;
         Label _status;
-        FileDialog _dialog;
+        FileBrowser _browser;
         string _folder;
         string _designName = "Tree";
         float _statusUntil;
@@ -34,7 +38,7 @@ namespace TreeWizard.App
 
         void OnEnable()
         {
-            _folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TreeWizard");
+            _folder = Path.Combine(Places.Documents, "TreeWizard");
             var root = GetComponent<UIDocument>().rootVisualElement;
 
             _settings = new TreeSettingsPanel();
@@ -61,8 +65,10 @@ namespace TreeWizard.App
             _stats = root.Q<Label>("stats");
             _status = root.Q<Label>("status");
 
-            _dialog = new FileDialog();
-            root.Add(_dialog);
+            _browser = new FileBrowser();
+            _browser.SetRecentFolders(PlayerPrefs.GetString(RecentFoldersKey, "").Split('\n'));
+            _browser.RecentFoldersChanged += () => PlayerPrefs.SetString(RecentFoldersKey, string.Join("\n", _browser.RecentFolders));
+            root.Add(_browser);
 
             if (presets.Count > 0)
                 _preset.index = 0; // applies it through the callback
@@ -80,7 +86,7 @@ namespace TreeWizard.App
 
         /// <summary>
         /// Automated check for builds: TreeWizard -smokeTest &lt;folder&gt; screenshots each preset, saves a
-        /// design and exports FBX into the folder, then quits with exit code 0, or 1 on any error.
+        /// design and exports FBX into the folder, screenshots the file browser, then quits with exit code 0, or 1 on any error.
         /// </summary>
         IEnumerator SmokeTest(string folder)
         {
@@ -109,6 +115,12 @@ namespace TreeWizard.App
                 }
             }
 
+            _browser.SaveFile("Save Design", folder, "Smoke" + TreeDesignFile.Extension, new[] { DesignFilter }, _ => { });
+            yield return new WaitForSeconds(1f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "FileBrowser.png"));
+            yield return new WaitForSeconds(0.5f);
+            _browser.Cancel();
+
             Debug.Log(failed ? "[SmokeTest] FAILED" : "[SmokeTest] passed");
             Application.Quit(failed ? 1 : 0);
         }
@@ -134,7 +146,7 @@ namespace TreeWizard.App
                 _status.RemoveFromClassList("status--visible");
                 _statusUntil = 0f;
             }
-            if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame && !IsTyping())
+            if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame && !_browser.IsOpen && !IsTyping())
                 FrameTree();
         }
 
@@ -156,7 +168,7 @@ namespace TreeWizard.App
         }
 
         void Save() =>
-            _dialog.Show(FileDialog.Mode.Save, "Save Design", _folder, _designName + TreeDesignFile.Extension, TreeDesignFile.Extension, path =>
+            _browser.SaveFile("Save Design", DefaultFolder(), _designName + TreeDesignFile.Extension, new[] { DesignFilter }, path =>
             {
                 TreeDesignFile.Save(path, _preset.value, tree.definition);
                 Remember(path);
@@ -164,7 +176,7 @@ namespace TreeWizard.App
             });
 
         void Open() =>
-            _dialog.Show(FileDialog.Mode.Open, "Open Design", _folder, "", TreeDesignFile.Extension, path =>
+            _browser.OpenFile("Open Design", DefaultFolder(), new[] { DesignFilter }, path =>
             {
                 var design = TreeDesignFile.Load(path);
                 var index = presets.FindIndex(p => p.name == design.preset);
@@ -181,12 +193,26 @@ namespace TreeWizard.App
             });
 
         void Export() =>
-            _dialog.Show(FileDialog.Mode.Save, "Export FBX", _folder, _designName + ".fbx", ".fbx", path =>
+            _browser.SaveFile("Export FBX", DefaultFolder(), _designName + ".fbx", new[] { FbxFilter }, path =>
             {
                 TreeFbxExporter.Export(tree, path);
                 _folder = Path.GetDirectoryName(path);
                 ShowStatus($"Exported {Path.GetFileName(path)} to {_folder}");
             });
+
+        // Documents/TreeWizard is created on first use; after that, wherever the person last saved or opened.
+        string DefaultFolder()
+        {
+            try
+            {
+                Directory.CreateDirectory(_folder);
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+            {
+                // the browser falls back to the nearest folder that exists
+            }
+            return _folder;
+        }
 
         void Remember(string path)
         {

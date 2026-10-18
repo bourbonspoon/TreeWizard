@@ -1,0 +1,354 @@
+/*
+ * TreeWizard file browser. Hosts can re-theme it by setting these variables on :root:
+ *   --tw-file-browser-window      window background
+ *   --tw-file-browser-pane        sidebar, list and field backgrounds
+ *   --tw-file-browser-text        main text and icons
+ *   --tw-file-browser-text-dim    headings, dates and sizes
+ *   --tw-file-browser-hover       hovered rows and buttons
+ *   --tw-file-browser-selection   selected rows and places
+ *   --tw-file-browser-accent      confirm button
+ *   --tw-file-browser-error       messages
+ */
+
+.tw-file-browser {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.tw-file-browser--hidden,
+.tw-file-browser__hidden {
+  display: none;
+}
+
+.tw-file-browser .unity-label {
+  color: var(--tw-file-browser-text, rgb(227, 229, 232));
+}
+
+.tw-file-browser__window {
+  width: 1000px;
+  max-width: 94%;
+  height: 680px;
+  max-height: 90%;
+  padding: 14px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--tw-file-browser-window, rgb(42, 45, 49));
+}
+
+.tw-file-browser__title {
+  font-size: 16px;
+  -unity-font-style: bold;
+  margin-bottom: 10px;
+}
+
+/* Toolbar: back, forward, up, path, search */
+
+.tw-file-browser__toolbar {
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tw-file-browser__icon-button {
+  width: 28px;
+  height: 26px;
+  margin: 0 2px 0 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border-width: 0;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.tw-file-browser__icon-button:hover {
+  background-color: var(--tw-file-browser-hover, rgba(255, 255, 255, 0.08));
+}
+
+.tw-file-browser__icon-button:disabled .tw-file-browser__icon {
+  opacity: 0.35;
+}
+
+.tw-file-browser__path {
+  flex-grow: 1;
+  flex-direction: row;
+  align-items: center;
+  height: 26px;
+  margin-right: 6px;
+  border-radius: 3px;
+  background-color: var(--tw-file-browser-pane, rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+}
+
+.tw-file-browser__breadcrumbs {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+  height: 100%;
+}
+
+.tw-file-browser__crumb {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 2px 4px;
+  border-width: 0;
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--tw-file-browser-text, rgb(227, 229, 232));
+}
+
+.tw-file-browser__crumb:hover {
+  background-color: var(--tw-file-browser-hover, rgba(255, 255, 255, 0.08));
+}
+
+.tw-file-browser__breadcrumbs > .tw-file-browser__icon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  opacity: 0.5;
+}
+
+.tw-file-browser__path-field {
+  display: none;
+  flex-grow: 1;
+  margin: 0;
+}
+
+.tw-file-browser__path--editing > .tw-file-browser__breadcrumbs {
+  display: none;
+}
+
+.tw-file-browser__path--editing > .tw-file-browser__path-field {
+  display: flex;
+}
+
+.tw-file-browser__path > .tw-file-browser__icon-button {
+  margin: 0;
+}
+
+.tw-file-browser__search {
+  width: 180px;
+  margin: 0;
+}
+
+/* Body: places sidebar and file list */
+
+.tw-file-browser__body {
+  flex-grow: 1;
+  flex-direction: row;
+}
+
+.tw-file-browser__places {
+  width: 190px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  padding: 4px 0;
+  border-radius: 3px;
+  background-color: var(--tw-file-browser-pane, rgba(0, 0, 0, 0.25));
+}
+
+.tw-file-browser__places-heading {
+  margin: 8px 10px 2px;
+  font-size: 11px;
+  -unity-font-style: bold;
+}
+
+.tw-file-browser .tw-file-browser__places-heading {
+  color: var(--tw-file-browser-text-dim, rgb(154, 160, 166));
+}
+
+.tw-file-browser__place {
+  flex-direction: row;
+  align-items: center;
+  margin: 0 4px;
+  padding: 3px 6px;
+  border-width: 0;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.tw-file-browser__place:hover {
+  background-color: var(--tw-file-browser-hover, rgba(255, 255, 255, 0.08));
+}
+
+.tw-file-browser__place--selected,
+.tw-file-browser__place--selected:hover {
+  background-color: var(--tw-file-browser-selection, rgba(67, 160, 71, 0.45));
+}
+
+.tw-file-browser__place-name {
+  flex-shrink: 1;
+  margin-left: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tw-file-browser__list {
+  flex-grow: 1;
+  border-radius: 3px;
+  background-color: var(--tw-file-browser-pane, rgba(0, 0, 0, 0.25));
+}
+
+.tw-file-browser .unity-multi-column-view__header-container {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.tw-file-browser .unity-multi-column-header__column {
+  background-color: rgba(0, 0, 0, 0);
+  border-color: var(--tw-file-browser-hover, rgba(255, 255, 255, 0.08));
+}
+
+.tw-file-browser .unity-multi-column-header__column:hover:enabled {
+  background-color: var(--tw-file-browser-hover, rgba(255, 255, 255, 0.08));
+}
+
+.tw-file-browser .unity-multi-column-header__column__title {
+  color: var(--tw-file-browser-text-dim, rgb(154, 160, 166));
+  -unity-font-style: bold;
+}
+
+.tw-file-browser .unity-multi-column-header__column__sort-indicator__arrow {
+  -unity-background-image-tint-color: var(--tw-file-browser-text-dim, rgb(154, 160, 166));
+}
+
+.tw-file-browser .unity-collection-view__item--alternative-background {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+.tw-file-browser .unity-collection-view__item:hover:enabled {
+  background-color: var(--tw-file-browser-hover, rgba(255, 255, 255, 0.08));
+}
+
+.tw-file-browser .unity-collection-view__item--selected,
+.tw-file-browser .unity-collection-view__item--selected:hover:enabled,
+.tw-file-browser .unity-collection-view:focus:enabled .unity-collection-view__item--selected {
+  background-color: var(--tw-file-browser-selection, rgba(67, 160, 71, 0.45));
+}
+
+.tw-file-browser__name-cell {
+  flex-grow: 1;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 6px;
+}
+
+.tw-file-browser__cell {
+  flex-grow: 1;
+  padding: 0 6px;
+  -unity-text-align: middle-left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tw-file-browser .tw-file-browser__cell {
+  color: var(--tw-file-browser-text-dim, rgb(154, 160, 166));
+}
+
+.tw-file-browser .tw-file-browser__name-cell > .tw-file-browser__cell {
+  color: var(--tw-file-browser-text, rgb(227, 229, 232));
+}
+
+/* Footer: name and filter, message, buttons or prompt */
+
+.tw-file-browser__name-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.tw-file-browser__file-name {
+  flex-grow: 1;
+  margin: 0 8px 0 0;
+}
+
+.tw-file-browser__file-name > .unity-base-field__label {
+  min-width: 50px;
+}
+
+.tw-file-browser__filter {
+  width: 260px;
+  margin: 0;
+}
+
+.tw-file-browser__message {
+  margin-top: 6px;
+  white-space: normal;
+}
+
+.tw-file-browser .tw-file-browser__message {
+  color: var(--tw-file-browser-error, rgb(255, 138, 128));
+}
+
+.tw-file-browser__buttons,
+.tw-file-browser__prompt {
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.tw-file-browser__spacer {
+  flex-grow: 1;
+}
+
+.tw-file-browser__prompt-text {
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin-right: 8px;
+  white-space: normal;
+}
+
+.tw-file-browser__prompt-field {
+  flex-grow: 1;
+  margin: 0 2px 0 0;
+}
+
+.tw-file-browser__button {
+  min-width: 84px;
+  height: 26px;
+  margin: 0 0 0 6px;
+}
+
+.tw-file-browser__confirm {
+  background-color: var(--tw-file-browser-accent, rgb(67, 160, 71));
+  color: rgb(255, 255, 255);
+  -unity-font-style: bold;
+}
+
+/* Icons: white SVGs tinted with the text colour */
+
+.tw-file-browser__icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  -unity-background-image-tint-color: var(--tw-file-browser-text, rgb(227, 229, 232));
+}
+
+.tw-file-browser__icon--back { background-image: url("../Icons/back.svg"); }
+.tw-file-browser__icon--forward { background-image: url("../Icons/forward.svg"); }
+.tw-file-browser__icon--up { background-image: url("../Icons/up.svg"); }
+.tw-file-browser__icon--edit { background-image: url("../Icons/edit.svg"); }
+.tw-file-browser__icon--chevron { background-image: url("../Icons/chevron.svg"); }
+.tw-file-browser__icon--file { background-image: url("../Icons/file.svg"); }
+.tw-file-browser__icon--image { background-image: url("../Icons/image.svg"); }
+.tw-file-browser__icon--home { background-image: url("../Icons/home.svg"); }
+.tw-file-browser__icon--desktop { background-image: url("../Icons/desktop.svg"); }
+.tw-file-browser__icon--documents { background-image: url("../Icons/documents.svg"); }
+.tw-file-browser__icon--downloads { background-image: url("../Icons/downloads.svg"); }
+.tw-file-browser__icon--pictures { background-image: url("../Icons/pictures.svg"); }
+.tw-file-browser__icon--drive { background-image: url("../Icons/drive.svg"); }
+.tw-file-browser__icon--recent { background-image: url("../Icons/recent.svg"); }
+
+.tw-file-browser__icon--folder {
+  background-image: url("../Icons/folder.svg");
+  -unity-background-image-tint-color: rgb(110, 168, 232);
+}

@@ -1,0 +1,6 @@
+{
+    "name": "TreeWizard.FileBrowser",
+    "rootNamespace": "TreeWizard.UI",
+    "references": [],
+    "autoReferenced": true
+}
