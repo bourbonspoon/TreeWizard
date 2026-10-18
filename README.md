@@ -5,7 +5,16 @@ A free, open-source procedural tree generator, in the spirit of SpeedTree.
 - **Unity package**: build trees inside the Unity Editor from a stack of trunk, branch and leaf generators, then bake meshes, materials and LODs.
 - **Standalone app**: the same generator as a desktop app that exports trees to FBX for any engine or DCC tool.
 
-> Early development. Nothing works yet.
+> Early development: usable, but expect changes.
+
+## Features
+
+- Trunk, up to three branch levels and leaf cards, all driven by a seed. Oak and Spruce presets.
+- Leaf atlases sliced automatically from leaf or twig sheets, with summer/autumn mixing.
+- Bark textures with generated normal maps.
+- `TreeWizard/Tree` URP shader with wind (sway, branch bob, leaf flutter). Add **GameObject > TreeWizard > Wind** to a scene.
+- Unity: **GameObject > 3D Object > TreeWizard Tree**, live inspector, Bake to Prefab, Export FBX.
+- Standalone app: design trees, save/open designs, export FBX with textures.
 
 ## Install (Unity package)
 
@@ -23,6 +32,19 @@ Requires Unity 6000.7 or newer.
 |---|---|
 | `TreeWizard/` | Unity host project (URP), which also builds the standalone app |
 | `TreeWizard/Packages/com.treewizard.core/` | The UPM package: runtime generator, editor tooling, tests |
+
+## Building the standalone app
+
+Open `TreeWizard/` in Unity 6000.7 or newer, then use **TreeWizard > Dev > Build macOS App** or **Build Windows App**. Builds go to `TreeWizard/Builds/`.
+
+To smoke-test a build, run it with `-smokeTest <folder>`. It screenshots each preset, saves a design and exports FBX into the folder, then quits with exit code 0 (pass) or 1 (fail):
+
+```
+# macOS
+TreeWizard.app/Contents/MacOS/TreeWizard -smokeTest ~/Desktop/tw-smoke
+# Windows
+TreeWizard.exe -smokeTest %USERPROFILE%\Desktop\tw-smoke
+```
 
 ## License
 

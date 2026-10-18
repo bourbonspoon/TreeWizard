@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -69,7 +70,55 @@ namespace TreeWizard.App
                 _settings.Definition = tree.definition;
         }
 
-        void Start() => FrameTree();
+        void Start()
+        {
+            FrameTree();
+            var smokeTest = Arg("-smokeTest");
+            if (smokeTest != null)
+                StartCoroutine(SmokeTest(smokeTest));
+        }
+
+        /// <summary>
+        /// Automated check for builds: TreeWizard -smokeTest &lt;folder&gt; screenshots each preset, saves a
+        /// design and exports FBX into the folder, then quits with exit code 0, or 1 on any error.
+        /// </summary>
+        IEnumerator SmokeTest(string folder)
+        {
+            Directory.CreateDirectory(folder);
+            var failed = false;
+            Application.logMessageReceived += (message, stack, type) =>
+            {
+                if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+                    failed = true;
+            };
+
+            for (var i = 0; i < presets.Count; i++)
+            {
+                _preset.index = i;
+                yield return new WaitForSeconds(2f);
+                ScreenCapture.CaptureScreenshot(Path.Combine(folder, $"{presets[i].name}.png"));
+                yield return new WaitForSeconds(0.5f); // the capture happens at the end of a frame
+                try
+                {
+                    TreeDesignFile.Save(Path.Combine(folder, presets[i].name + TreeDesignFile.Extension), _preset.value, tree.definition);
+                    TreeFbxExporter.Export(tree, Path.Combine(folder, presets[i].name + ".fbx"));
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+
+            Debug.Log(failed ? "[SmokeTest] FAILED" : "[SmokeTest] passed");
+            Application.Quit(failed ? 1 : 0);
+        }
+
+        static string Arg(string name)
+        {
+            var args = Environment.GetCommandLineArgs();
+            var i = Array.IndexOf(args, name);
+            return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
+        }
 
         void Update()
         {
