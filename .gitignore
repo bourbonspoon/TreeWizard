@@ -45,6 +45,7 @@ crashlytics-build.properties
 # Local scratch space and source art (not versioned; the repo ships only the built atlases)
 /Scratch/
 /RawTextures/
+/Build/
 
 # OS
 .DS_Store
