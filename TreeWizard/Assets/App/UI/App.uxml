@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:Style src="App.uss" />
+  <ui:VisualElement name="appRoot" class="app" picking-mode="Ignore">
+    <ui:VisualElement name="sidebar" class="sidebar">
+      <ui:Label text="TreeWizard" class="sidebar__title" />
+      <ui:VisualElement class="toolbar">
+        <ui:Button name="openButton" text="Open…" class="toolbar__button" />
+        <ui:Button name="saveButton" text="Save…" class="toolbar__button" />
+        <ui:Button name="exportButton" text="Export FBX…" class="toolbar__button toolbar__button--primary" />
+      </ui:VisualElement>
+      <ui:DropdownField name="preset" label="Preset" />
+      <ui:ScrollView name="settingsScroll" class="sidebar__scroll" horizontal-scroller-visibility="Hidden">
+        <ui:VisualElement name="settings" />
+      </ui:ScrollView>
+      <ui:Label name="stats" class="sidebar__stats" />
+    </ui:VisualElement>
+    <ui:Label name="status" class="status" picking-mode="Ignore" />
+  </ui:VisualElement>
+</ui:UXML>

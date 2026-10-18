@@ -99,6 +99,9 @@ namespace TreeWizard
 
         [Tooltip("Rings along each branch.")]
         [Range(2, 32)] public int segments = 6;
+
+        /// <summary>Sensible starting values for a newly added outer level: fewer, shorter, simpler twigs.</summary>
+        public static BranchLevelSettings OuterLevel() => new BranchLevelSettings { count = 4, length = 0.35f, segments = 3 };
     }
 
     public enum LeafShape

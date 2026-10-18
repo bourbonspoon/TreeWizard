@@ -1,0 +1,185 @@
+:root {
+  --panel-bg: rgba(30, 32, 35, 0.94);
+  --window-bg: rgb(42, 45, 49);
+  --text: rgb(227, 229, 232);
+  --text-dim: rgb(154, 160, 166);
+  --accent: rgb(67, 160, 71);
+  --accent-hover: rgb(88, 182, 92);
+  --divider: rgba(255, 255, 255, 0.08);
+}
+
+.app {
+  flex-grow: 1;
+}
+
+.sidebar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 380px;
+  padding: 12px;
+  background-color: var(--panel-bg);
+  border-right-width: 1px;
+  border-right-color: var(--divider);
+}
+
+.sidebar__title {
+  font-size: 20px;
+  -unity-font-style: bold;
+  margin-bottom: 8px;
+}
+
+.toolbar {
+  flex-direction: row;
+  margin-bottom: 8px;
+}
+
+.toolbar__button {
+  flex-grow: 1;
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+.toolbar__button--primary {
+  margin-right: 0;
+  background-color: var(--accent);
+  color: rgb(255, 255, 255);
+}
+
+.toolbar__button--primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.sidebar__scroll {
+  flex-grow: 1;
+  margin-top: 8px;
+}
+
+.sidebar__stats {
+  margin-top: 8px;
+  color: var(--text-dim);
+  -unity-font-style: italic;
+}
+
+.sidebar .unity-label,
+.sidebar .unity-foldout__text,
+.file-dialog .unity-label {
+  color: var(--text);
+}
+
+.sidebar .unity-base-field__label {
+  min-width: 130px;
+}
+
+.sidebar .unity-foldout__checkmark {
+  -unity-background-image-tint-color: var(--text);
+}
+
+.tw-settings__section {
+  margin-top: 4px;
+}
+
+.tw-settings__section > .unity-foldout__toggle .unity-foldout__text {
+  -unity-font-style: bold;
+}
+
+.tw-settings__row {
+  flex-direction: row;
+  align-items: center;
+}
+
+.tw-settings--grow {
+  flex-grow: 1;
+}
+
+.status {
+  display: none;
+  position: absolute;
+  left: 396px;
+  bottom: 16px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: rgb(255, 255, 255);
+}
+
+.status--visible {
+  display: flex;
+}
+
+.file-dialog {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.file-dialog--hidden {
+  display: none;
+}
+
+.file-dialog__window {
+  width: 640px;
+  height: 70%;
+  padding: 16px;
+  border-radius: 6px;
+  background-color: var(--window-bg);
+}
+
+.file-dialog__title {
+  font-size: 16px;
+  -unity-font-style: bold;
+  margin-bottom: 8px;
+}
+
+.file-dialog__row {
+  flex-direction: row;
+}
+
+.file-dialog__folder {
+  flex-grow: 1;
+}
+
+.file-dialog__list {
+  flex-grow: 1;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.file-dialog__entry {
+  margin: 0;
+  border-width: 0;
+  border-radius: 0;
+  -unity-text-align: middle-left;
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--text);
+}
+
+.file-dialog__entry:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.file-dialog__entry--folder {
+  -unity-font-style: bold;
+}
+
+.file-dialog__error {
+  min-height: 18px;
+  color: rgb(255, 138, 128);
+}
+
+.file-dialog__buttons {
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.file-dialog__confirm {
+  background-color: var(--accent);
+  color: rgb(255, 255, 255);
+}

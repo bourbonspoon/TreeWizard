@@ -16,4 +16,5 @@ All notable changes to this package are documented here. The format follows [Kee
 - Tree inspector: preset picker, seed randomizer, foldable sections, add/remove branch levels, live triangle counts, Save as Preset and Bake to Prefab.
 - `TreeWizard.Fbx`: a standalone, engine-free binary FBX 7.4 writer (static meshes, materials, textures, model hierarchy), checked against Unity's and Blender's importers.
 - Export FBX: `TreeFbxExporter` (works in the Editor and in builds) and an **Export FBX…** inspector button. Textures are saved as PNGs beside the file.
+- `TreeSettingsPanel`: runtime UI Toolkit editor for tree settings, generated from the same attributes as the inspector, for building tree editing into apps.
 - Bake to Prefab writes a static prefab with the mesh embedded; re-baking updates the mesh in place so existing references keep working.
