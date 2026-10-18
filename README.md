@@ -14,7 +14,7 @@ A free, open-source procedural tree generator, in the spirit of SpeedTree.
 - Bark textures with generated normal maps.
 - `TreeWizard/Tree` URP shader with wind (sway, branch bob, leaf flutter). Add **GameObject > TreeWizard > Wind** to a scene.
 - Unity: **GameObject > 3D Object > TreeWizard Tree**, live inspector, Bake to Prefab, Export FBX.
-- Standalone app: design trees, use your own bark and leaf sheet images, save/open designs with undo/redo and unsaved-change prompts, export FBX with textures. The UI follows the display scale (Retina, Windows scaling); Cmd/Ctrl + and - resize it, 0 resets.
+- Standalone app: design trees, use your own bark and leaf sheet images and choose the leaf mix, save/open designs with undo/redo and unsaved-change prompts, export FBX with textures. The UI follows the display scale (Retina, Windows scaling); Cmd/Ctrl + and - resize it, 0 resets.
 - Reusable pieces with their own assemblies and no dependency on the rest of TreeWizard: a binary FBX writer (`Fbx/`) and a UI Toolkit file browser for built players (`FileBrowser/`).
 
 ## Install (Unity package)

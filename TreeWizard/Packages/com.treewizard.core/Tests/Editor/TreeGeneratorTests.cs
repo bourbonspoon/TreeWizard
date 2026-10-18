@@ -290,6 +290,20 @@ namespace TreeWizard.Editor.Tests
         }
 
         [Test]
+        public void CellWeights_SetTheMix_AndZeroLeavesACellOut()
+        {
+            var cells = new[] { LeafCell.FullTexture, LeafCell.FullTexture, LeafCell.FullTexture };
+            var def = new TreeDefinition { leaves = { cellWeights = new[] { 0f, 3f } } }; // the third counts as 1
+
+            var leaves = TreeSkeleton.Generate(def, cells).leaves;
+
+            Assert.IsFalse(leaves.Any(l => l.cell == 0));
+            var second = leaves.Count(l => l.cell == 1);
+            var third = leaves.Count(l => l.cell == 2);
+            Assert.AreEqual(3f, (float)second / third, 0.6f);
+        }
+
+        [Test]
         public void LeafCards_UseTheirCellsUvsAndProportions()
         {
             var def = new TreeDefinition();

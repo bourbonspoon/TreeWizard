@@ -37,6 +37,7 @@
           </ui:VisualElement>
           <ui:Button name="presetTexturesButton" text="Use Preset Textures" class="textures__reset" />
         </ui:Foldout>
+        <ui:Foldout name="leafMixSection" text="Leaf Mix" value="false" class="tw-settings__section" />
         <ui:VisualElement name="settings" />
       </ui:ScrollView>
       <ui:Slider name="wind" label="Wind" low-value="0" high-value="2" show-input-field="true" class="sidebar__wind" />

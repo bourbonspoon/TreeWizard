@@ -172,6 +172,10 @@ namespace TreeWizard
 
         [Tooltip("Share of leaves using the leaf atlas's autumn cells.")]
         [Range(0f, 1f)] public float autumn;
+
+        [Tooltip("How often each leaf atlas cell is used, by cell index, on top of the atlas's own weights. 0 leaves a cell out; " +
+                 "missing entries count as 1. Edited in the Leaf Mix section.")]
+        [HideInInspector] public float[] cellWeights = Array.Empty<float>();
     }
 
     [Serializable]

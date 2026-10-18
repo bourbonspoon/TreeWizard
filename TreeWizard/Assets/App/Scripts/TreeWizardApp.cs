@@ -53,6 +53,7 @@ namespace TreeWizard.App
         Label _designLabel;
         Button _undoButton, _redoButton;
         ScrollView _settingsScroll;
+        LeafMixPanel _leafMix;
 
         void OnEnable()
         {
@@ -72,6 +73,13 @@ namespace TreeWizard.App
             };
             root.Q("settings").Add(_settings);
             _settingsScroll = root.Q<ScrollView>("settingsScroll");
+            _leafMix = new LeafMixPanel();
+            _leafMix.Changed += () =>
+            {
+                tree.MarkDirty();
+                RecordChange(true);
+            };
+            root.Q("leafMixSection").Add(_leafMix);
 
             _designLabel = root.Q<Label>("designLabel");
             _undoButton = root.Q<Button>("undoButton");
@@ -102,6 +110,9 @@ namespace TreeWizard.App
             _textures = new CustomTextures(tree);
             _textures.Changed += () =>
             {
+                if (_quiet == 0 && tree.leafAtlas != _leafMix.Atlas)
+                    tree.definition.leaves.cellWeights = Array.Empty<float>(); // the mix belonged to the old leaves
+                BindLeafMix();
                 ShowTextures();
                 RecordChange(false);
             };
@@ -177,6 +188,22 @@ namespace TreeWizard.App
                     Debug.LogException(e);
                 }
             }
+
+            // Leaf Mix shows a thumbnail per atlas cell, and zeroing one leaves it out of the tree.
+            var mixSection = GetComponent<UIDocument>().rootVisualElement.Q<Foldout>("leafMixSection");
+            mixSection.value = true;
+            var thumbnails = _leafMix.Query<Image>().ToList().Count;
+            if (thumbnails != tree.leafAtlas.cells.Count)
+                Debug.LogError($"[SmokeTest] leaf mix shows {thumbnails} leaves for {tree.leafAtlas.cells.Count} atlas cells");
+            tree.definition.leaves.cellWeights = Enumerable.Repeat(0f, tree.leafAtlas.cells.Count - 1).ToArray(); // only the last
+            tree.Rebuild();
+            _leafMix.Refresh();
+            yield return new WaitForSeconds(0.5f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "LeafMix.png"));
+            yield return new WaitForSeconds(0.5f);
+            tree.definition.leaves.cellWeights = Array.Empty<float>();
+            tree.Rebuild();
+            mixSection.value = false;
 
             var barkPath = Path.Combine(folder, "SmokeBark.png");
             var sheetPath = Path.Combine(folder, "SmokeLeaves.png");
@@ -367,6 +394,7 @@ namespace TreeWizard.App
             tree.ApplyPreset(presets[index]);
             _textures.Apply(presets[index]); // keeps the person's own textures over the new preset, and rebuilds
             _settings.Definition = tree.definition;
+            BindLeafMix();
             _designName = presets[index].name;
             FrameTree();
             RecordChange(false);
@@ -434,6 +462,7 @@ namespace TreeWizard.App
             tree.MarkDirty();
             var scroll = _settingsScroll.scrollOffset;
             _settings.Definition = tree.definition;
+            BindLeafMix();
             _settingsScroll.schedule.Execute(() => _settingsScroll.scrollOffset = scroll); // after the rebuilt panel's layout
         }
 
@@ -476,6 +505,8 @@ namespace TreeWizard.App
             }
             return missing;
         }
+
+        void BindLeafMix() => _leafMix.Bind(tree.definition.leaves, tree.leafAtlas);
 
         /// <summary>The whole design as one string: what undo steps between, and what tells whether it's been saved.</summary>
         string Snapshot() => JsonUtility.ToJson(new TreeDesignFile { preset = _preset.value, definition = tree.definition, textures = _textures.Files });

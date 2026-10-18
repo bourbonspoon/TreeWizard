@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using TreeWizard.UI;
 
 namespace TreeWizard.Editor
 {
@@ -13,6 +14,7 @@ namespace TreeWizard.Editor
     {
         SerializedProperty _definition;
         VisualElement _levels;
+        LeafMixPanel _leafMix;
         Label _stats;
 
         TreeWizardTree Tree => (TreeWizardTree)target;
@@ -28,6 +30,7 @@ namespace TreeWizard.Editor
             root.Add(Section("Roots", _definition.FindPropertyRelative(nameof(TreeDefinition.roots)), false));
             root.Add(BranchLevels());
             root.Add(Section("Leaves", _definition.FindPropertyRelative(nameof(TreeDefinition.leaves)), true));
+            root.Add(LeafMix());
             root.Add(Section("Mesh", _definition.FindPropertyRelative(nameof(TreeDefinition.mesh)), false));
 
             var materials = Foldout("Materials", true);
@@ -50,6 +53,32 @@ namespace TreeWizard.Editor
             // Undo or an outside edit can change the number of branch levels.
             root.TrackPropertyValue(_definition.FindPropertyRelative(nameof(TreeDefinition.branchLevels) + ".Array.size"), _ => RebuildLevels());
             return root;
+        }
+
+        // Thumbnails and weights for the atlas's leaves. Edits go through Undo; undo and atlas changes refresh it.
+        VisualElement LeafMix()
+        {
+            var foldout = Foldout("Leaf Mix", false);
+            if (targets.Length > 1)
+            {
+                foldout.Add(new Label("Select one tree to edit its leaf mix."));
+                return foldout;
+            }
+            _leafMix = new LeafMixPanel();
+            _leafMix.Changing += () => Undo.RecordObject(Tree, "Change Leaf Mix");
+            _leafMix.Changed += () =>
+            {
+                EditorUtility.SetDirty(Tree);
+                Tree.MarkDirty();
+                serializedObject.Update();
+            };
+            _leafMix.Bind(Tree.definition.leaves, Tree.leafAtlas);
+            foldout.Add(_leafMix);
+            foldout.TrackPropertyValue(serializedObject.FindProperty(nameof(TreeWizardTree.leafAtlas)),
+                _ => _leafMix.Bind(Tree.definition.leaves, Tree.leafAtlas));
+            foldout.TrackPropertyValue(_definition.FindPropertyRelative(nameof(TreeDefinition.leaves)).FindPropertyRelative(nameof(LeafSettings.cellWeights)),
+                _ => _leafMix.Bind(Tree.definition.leaves, Tree.leafAtlas)); // undo, or a preset applied
+            return foldout;
         }
 
         VisualElement PresetRow()

@@ -145,6 +145,10 @@
   flex-grow: 1;
 }
 
+.sidebar .tw-leaf-mix__hint {
+  color: var(--text-dim);
+}
+
 .textures__row {
   flex-direction: row;
   align-items: center;

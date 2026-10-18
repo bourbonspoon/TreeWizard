@@ -114,7 +114,7 @@ namespace TreeWizard
 
             if (def.leaves.enabled)
             {
-                var picker = new CellPicker(cells);
+                var picker = new CellPicker(cells, def.leaves.cellWeights);
                 for (var b = levelStart; b < levelEnd; b++)
                     skeleton.AddLeaves(b, def.leaves, def.seed, picker);
             }
@@ -256,19 +256,21 @@ namespace TreeWizard
         /// <summary>Weighted choice of leaf cell, from the autumn or summer pool.</summary>
         class CellPicker
         {
-            readonly IReadOnlyList<LeafCell> _cells;
+            readonly float[] _weights;
             readonly List<int> _summer = new List<int>();
             readonly List<int> _autumn = new List<int>();
             readonly List<int> _all = new List<int>();
 
-            public CellPicker(IReadOnlyList<LeafCell> cells)
+            /// <param name="mix">The tree's own weight per cell (<see cref="LeafSettings.cellWeights"/>), times the atlas's.</param>
+            public CellPicker(IReadOnlyList<LeafCell> cells, float[] mix)
             {
-                _cells = cells;
                 if (cells == null)
                     return;
+                _weights = new float[cells.Count];
                 for (var i = 0; i < cells.Count; i++)
                 {
-                    if (cells[i].weight <= 0f)
+                    _weights[i] = cells[i].weight * (mix != null && i < mix.Length ? mix[i] : 1f);
+                    if (_weights[i] <= 0f)
                         continue;
                     _all.Add(i);
                     (cells[i].autumn ? _autumn : _summer).Add(i);
@@ -286,11 +288,11 @@ namespace TreeWizard
 
                 var total = 0f;
                 foreach (var i in pool)
-                    total += _cells[i].weight;
+                    total += _weights[i];
                 var target = roll * total;
                 foreach (var i in pool)
                 {
-                    target -= _cells[i].weight;
+                    target -= _weights[i];
                     if (target < 0f)
                         return i;
                 }
