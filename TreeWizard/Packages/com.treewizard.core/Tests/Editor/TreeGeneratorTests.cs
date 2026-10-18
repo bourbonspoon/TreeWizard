@@ -199,6 +199,42 @@ namespace TreeWizard.Editor.Tests
         }
 
         [Test]
+        public void Roots_AreOffByDefault_AndFollowTheirCount()
+        {
+            Assert.IsFalse(TreeSkeleton.Generate(new TreeDefinition()).branches.Any(b => b.level == Branch.RootLevel));
+
+            var def = new TreeDefinition { roots = { count = 5 } };
+            Assert.AreEqual(5, TreeSkeleton.Generate(def).branches.Count(b => b.level == Branch.RootLevel));
+        }
+
+        [TestCase(0f)]
+        [TestCase(1f)]
+        public void Roots_StayShallow_AndEndUnderground(float depth)
+        {
+            var def = new TreeDefinition { roots = { count = 6, depth = depth, crookedness = 1f } };
+            var roots = TreeSkeleton.Generate(def).branches.Where(b => b.level == Branch.RootLevel).ToList();
+            var baseRadius = def.trunk.radius * def.roots.radius;
+
+            foreach (var root in roots)
+            {
+                Assert.That(root.nodes.Max(n => n.position.y + n.radius), Is.LessThanOrEqualTo(2f * baseRadius + 1e-4f), "never higher than its own thickness");
+                var tip = root.nodes[root.nodes.Count - 1];
+                Assert.That(tip.position.y + tip.radius * TreeMeshBuilder.RootSquash, Is.LessThan(0f), "the tip is buried");
+                var reach = new Vector2(tip.position.x, tip.position.z).magnitude;
+                Assert.That(reach, Is.GreaterThan(def.trunk.radius * 2f), "spreads well beyond the trunk");
+            }
+        }
+
+        [Test]
+        public void Roots_DontChangeTheRestOfTheTree()
+        {
+            var plain = TreeSkeleton.Generate(new TreeDefinition());
+            var rooted = TreeSkeleton.Generate(new TreeDefinition { roots = { count = 4 } });
+
+            CollectionAssert.AreEqual(plain.leaves.Select(l => l.position), rooted.leaves.Select(l => l.position));
+        }
+
+        [Test]
         public void DefaultTree_StaysLightweight()
         {
             Assert.Less(TreeGenerator.Generate(new TreeDefinition()).TriangleCount, 10000);

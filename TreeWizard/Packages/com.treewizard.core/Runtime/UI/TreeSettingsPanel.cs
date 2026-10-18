@@ -80,6 +80,7 @@ namespace TreeWizard.UI
             Add(seedRow);
 
             Add(Section("Trunk", _definition.trunk, true, _refreshers));
+            Add(Section("Roots", _definition.roots, false, _refreshers));
             Add(BranchesSection());
             Add(Section("Leaves", _definition.leaves, true, _refreshers));
             Add(Section("Mesh", _definition.mesh, false, _refreshers));

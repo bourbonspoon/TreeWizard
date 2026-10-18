@@ -16,6 +16,7 @@ namespace TreeWizard
         public int seed = 1;
 
         public TrunkSettings trunk = new TrunkSettings();
+        public RootSettings roots = new RootSettings();
 
         [Tooltip("Up to three levels. Each level grows off every branch of the level before it.")]
         public BranchLevelSettings[] branchLevels =
@@ -62,6 +63,30 @@ namespace TreeWizard
 
         [Tooltip("Rings along the trunk.")]
         [Range(2, 64)] public int segments = 10;
+    }
+
+    [Serializable]
+    public class RootSettings
+    {
+        [Tooltip("Shallow roots spreading from the base, sinking into the ground along their length so they blend with terrain. 0 for none.")]
+        [Range(0, 16)] public int count;
+
+        [Tooltip("How far roots reach, as a multiple of the trunk's base radius.")]
+        [Range(0.5f, 20f)] public float length = 6f;
+
+        [Range(0f, 1f)] public float lengthVariance = 0.3f;
+
+        [Tooltip("Thickness where a root leaves the trunk, as a fraction of the trunk's base radius.")]
+        [Range(0.05f, 1f)] public float radius = 0.5f;
+
+        [Tooltip("How soon roots sink into the ground. 0: half buried about halfway along. 1: under the surface by halfway. Tips are always buried.")]
+        [Range(0f, 1f)] public float depth = 0.3f;
+
+        [Tooltip("Snaking from side to side.")]
+        [Range(0f, 1f)] public float crookedness = 0.5f;
+
+        [Tooltip("Rings along each root.")]
+        [Range(2, 16)] public int segments = 6;
     }
 
     [Serializable]

@@ -25,6 +25,7 @@ namespace TreeWizard.Editor
             root.Add(PresetRow());
             root.Add(SeedRow());
             root.Add(Section("Trunk", _definition.FindPropertyRelative(nameof(TreeDefinition.trunk)), true));
+            root.Add(Section("Roots", _definition.FindPropertyRelative(nameof(TreeDefinition.roots)), false));
             root.Add(BranchLevels());
             root.Add(Section("Leaves", _definition.FindPropertyRelative(nameof(TreeDefinition.leaves)), true));
             root.Add(Section("Mesh", _definition.FindPropertyRelative(nameof(TreeDefinition.mesh)), false));

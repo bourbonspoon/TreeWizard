@@ -10,6 +10,7 @@ All notable changes to this package are documented here. The format follows [Kee
 - `TreeWizardTree` component that rebuilds the mesh live as settings change.
 - Leaf atlases: `LeafSheetSlicer` finds each leaf or twig on transparent sheets, cleans background fringes and packs an atlas; `LeafAtlasBuilder` writes it as a texture plus `LeafAtlas` asset. Cards take each cell's proportions and stem position.
 - Leaf **Outward** setting: turns cards from facing the sky to facing away from the trunk, for fuller crowns from the side.
+- **Roots**: shallow surface roots spreading from the base, low broad ridges that snake outward and sink into the ground along their length, so trees sit naturally on detailed terrain. Off by default; the Oak and Spruce presets have them. Wind no longer moves anything near the ground.
 - **Flatten** setting on branch levels and leaves: spreads them flat to either side of their parent instead of spiralling around it, for layered conifer sprays and fern-like fronds.
 - Leaf **Canopy Normals** setting: bends leaf lighting out from the crown's centre so canopies shade as one rounded mass. Carried through FBX export.
 - Autumn setting: the share of leaves drawn from an atlas's autumn-coloured cells. Greens through blue-greens count as summer.

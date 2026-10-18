@@ -39,7 +39,7 @@ namespace TreeWizardDev
                 Name = "Oak",
                 LeafSheetPrefixes = new[] { "oak-twigs" },
                 BarkFile = "Oak-bark-seamless-texture-251.png",
-                Definition = () => new TreeDefinition(),
+                Definition = () => new TreeDefinition { roots = { count = 6 } },
             },
             new Species
             {
@@ -63,6 +63,7 @@ namespace TreeWizardDev
                 crookedness = 0.04f,
                 segments = 12,
             },
+            roots = new RootSettings { count = 5, length = 7f }, // spruce roots are shallow and spread wide
             branchLevels = new[]
             {
                 // Tiers of near-horizontal, drooping limbs that shorten towards the top: the cone.

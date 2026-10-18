@@ -18,8 +18,10 @@ namespace TreeWizard
 
     public class Branch
     {
-        /// <summary>0 for the trunk, 1+ for branch levels.</summary>
+        /// <summary>0 for the trunk, 1+ for branch levels, <see cref="RootLevel"/> for roots.</summary>
         public int level;
+
+        public const int RootLevel = -1;
         /// <summary>Index of the parent in <see cref="TreeSkeleton.branches"/>, -1 for the trunk.</summary>
         public int parent = -1;
         /// <summary>Base radius, ignoring trunk flare. Drives how many sides the mesh gets.</summary>
@@ -76,6 +78,9 @@ namespace TreeWizard
         const float MinRadius = 0.002f;
         const float MaxWobble = 1.5f;         // radians, spread over a branch's segments
         const int LeafStream = 1000;
+        const int RootStream = 2000;
+        const float RootTipRadius = 0.3f;     // fraction of a root's base radius
+        const float MaxRootTurn = 100f;       // degrees of sideways snaking per root at full crookedness
 
         public readonly List<Branch> branches = new List<Branch>();
         public readonly List<Leaf> leaves = new List<Leaf>();
@@ -113,6 +118,9 @@ namespace TreeWizard
                 for (var b = levelStart; b < levelEnd; b++)
                     skeleton.AddLeaves(b, def.leaves, def.seed, picker);
             }
+
+            if (def.roots != null && def.roots.count > 0)
+                skeleton.AddRoots(def.trunk, def.roots, def.seed);
 
             return skeleton;
         }
@@ -158,6 +166,54 @@ namespace TreeWizard
                 var branch = Grow(level, parentIndex, at.position, direction, length, radius, Mathf.Max(2, s.segments),
                     s.crookedness, s.gravity, u => Mathf.Lerp(radius, radius * BranchTipRadius, u), growRng);
                 branches.Add(branch);
+            }
+        }
+
+        /// <summary>
+        /// Roots fanning out around the base. Each starts inside the trunk sitting on the ground, runs outward
+        /// snaking from side to side, and sinks: half buried part way along, fully buried at the tip, so no end shows.
+        /// </summary>
+        void AddRoots(TrunkSettings trunk, RootSettings s, int seed)
+        {
+            var rng = new Rng(Rng.Combine(seed, RootStream));
+            var azimuthOffset = rng.Range(0f, 360f);
+            var baseRadius = Mathf.Max(trunk.radius * s.radius, MinRadius);
+            var segments = Mathf.Max(2, s.segments);
+            var turnPerStep = s.crookedness * MaxRootTurn / Mathf.Sqrt(segments);
+
+            for (var i = 0; i < s.count; i++)
+            {
+                var heading = azimuthOffset + i * 360f / s.count + rng.Range(-0.4f, 0.4f) * 360f / s.count;
+                var scale = 1f + rng.Range(-1f, 1f) * s.lengthVariance;
+                var length = trunk.radius * s.length * scale;
+                var thickness = baseRadius * Mathf.Sqrt(Mathf.Max(scale, 0.1f)); // long roots are thick ones
+                var root = new Branch { level = Branch.RootLevel, parent = 0, radius = thickness };
+                var flat = Quaternion.Euler(0f, heading, 0f) * Vector3.forward * (trunk.radius * 0.5f);
+                var step = length / segments;
+                for (var n = 0; n <= segments; n++)
+                {
+                    var u = (float)n / segments;
+                    var radius = thickness * Mathf.Lerp(1f, RootTipRadius, u);
+                    // Centre height in (squashed) root heights: +1 sits on the ground, 0 is half buried, -1 just under.
+                    // Starts a little higher, so the root climbs onto the trunk's flare, and dives towards the end
+                    // so the thin tip never shows.
+                    var lift = (1.3f - 1.6f * u - (0.8f + 2f * s.depth) * u * u) * TreeMeshBuilder.RootSquash;
+                    root.nodes.Add(new BranchNode
+                    {
+                        position = new Vector3(flat.x, radius * lift, flat.z),
+                        radius = radius,
+                    });
+                    heading += rng.Range(-1f, 1f) * turnPerStep;
+                    flat += Quaternion.Euler(0f, heading, 0f) * Vector3.forward * step;
+                }
+                for (var n = 1; n < root.nodes.Count; n++)
+                {
+                    var node = root.nodes[n];
+                    node.distance = root.nodes[n - 1].distance + Vector3.Distance(root.nodes[n - 1].position, node.position);
+                    root.nodes[n] = node;
+                }
+                ComputeFrames(root.nodes);
+                branches.Add(root);
             }
         }
 

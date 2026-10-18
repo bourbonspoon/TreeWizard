@@ -46,7 +46,8 @@ namespace TreeWizardDev
         /// reopens the scene that was open before. <paramref name="tweak"/> can change the settings first, for trying ideas
         /// without rebuilding the preset.
         /// </summary>
-        public static void RenderTo(string outPath, string presetName, int seeds, float autumn, Action<TreeDefinition> tweak = null)
+        /// <param name="baseCloseUp">Frame the base of the first tree from standing height instead, to judge roots and flare.</param>
+        public static void RenderTo(string outPath, string presetName, int seeds, float autumn, Action<TreeDefinition> tweak = null, bool baseCloseUp = false)
         {
             var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
             var preset = AssetDatabase.LoadAssetAtPath<TreePreset>($"Packages/com.treewizard.core/Presets/{presetName}/{presetName}.asset");
@@ -88,6 +89,14 @@ namespace TreeWizardDev
                 RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
                 RenderSettings.ambientLight = new Color(0.45f, 0.5f, 0.6f);
 
+                if (baseCloseUp)
+                {
+                    var trunk = preset.definition.trunk;
+                    var reach = trunk.radius * 10f;
+                    Capture(new Bounds(new Vector3(0f, trunk.radius * 2f, 0f), new Vector3(reach, trunk.radius * 4f, reach)), outPath, 1200, 800, 25f);
+                    return;
+                }
+
                 var width = TileWidth * seeds;
                 var cam = new GameObject("Camera").AddComponent<Camera>();
                 cam.clearFlags = CameraClearFlags.SolidColor;
@@ -114,7 +123,7 @@ namespace TreeWizardDev
             Capture(target.GetComponent<Renderer>().bounds, outPath, width, height);
 
         /// <summary>Renders the region <paramref name="bounds"/> from a 3/4 view, e.g. part of a tree for a close-up.</summary>
-        public static void Capture(Bounds bounds, string outPath, int width = 900, int height = 900)
+        public static void Capture(Bounds bounds, string outPath, int width = 900, int height = 900, float pitch = 10f)
         {
             var cam = new GameObject("TreePreview Camera") { hideFlags = HideFlags.HideAndDontSave }.AddComponent<Camera>();
             try
@@ -124,7 +133,7 @@ namespace TreeWizardDev
                 cam.fieldOfView = 30f;
                 cam.aspect = (float)width / height;
                 var distance = bounds.extents.magnitude / Mathf.Sin(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-                cam.transform.position = bounds.center + Quaternion.Euler(10f, -30f, 0f) * Vector3.back * distance;
+                cam.transform.position = bounds.center + Quaternion.Euler(pitch, -30f, 0f) * Vector3.back * distance;
                 cam.transform.LookAt(bounds.center);
                 cam.nearClipPlane = 0.05f;
                 cam.farClipPlane = distance * 4f;

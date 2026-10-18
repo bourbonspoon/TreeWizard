@@ -9,6 +9,10 @@ namespace TreeWizard
     /// </summary>
     public static class TreeMeshBuilder
     {
+        /// <summary>Root cross-sections are this tall for their radius, and wider by <see cref="RootSpread"/>: low, broad ridges.</summary>
+        public const float RootSquash = 0.6f;
+        public const float RootSpread = 1.25f;
+
         /// <param name="cells">The cells the skeleton's leaves index into, or null for the whole texture.</param>
         public static MeshData Build(TreeSkeleton skeleton, TreeDefinition def, IReadOnlyList<LeafCell> cells = null)
         {
@@ -26,8 +30,9 @@ namespace TreeWizard
 
         static void AddBranch(MeshData data, Branch branch, MeshSettings settings, float trunkRadius)
         {
-            var radial = branch.level == 0
-                ? settings.radialSegments
+            // Roots are mostly buried, but the ridge that shows needs more than the 4 sides a thin branch gets.
+            var radial = branch.level == 0 ? settings.radialSegments
+                : branch.level == Branch.RootLevel ? Mathf.Max(Mathf.Min(settings.minRadialSegments, settings.radialSegments), Mathf.CeilToInt(settings.radialSegments * 0.75f))
                 : Mathf.Clamp(Mathf.CeilToInt(settings.radialSegments * branch.radius / trunkRadius),
                     Mathf.Min(settings.minRadialSegments, settings.radialSegments), settings.radialSegments);
             var ring = radial + 1; // the seam vertex is duplicated so U can run 0..1
@@ -35,6 +40,7 @@ namespace TreeWizard
             var tris = data.Triangles(MeshData.BarkSubmesh);
             var first = data.vertices.Count;
 
+            var root = branch.level == Branch.RootLevel;
             foreach (var node in branch.nodes)
             {
                 var binormal = Vector3.Cross(node.tangent, node.normal);
@@ -43,7 +49,17 @@ namespace TreeWizard
                 {
                     var a = (float)j / radial * 2f * Mathf.PI;
                     var outward = Mathf.Cos(a) * node.normal + Mathf.Sin(a) * binormal;
-                    data.AddVertex(node.position + outward * node.radius, outward, new Vector2((float)j / radial, v));
+                    var offset = outward * node.radius;
+                    var normal = outward;
+                    if (root)
+                    {
+                        // Squash the ring vertically and widen it across: scale along up and along the
+                        // horizontal side, and scale normals by the inverse so lighting follows the new shape.
+                        var side = Vector3.Cross(Vector3.up, node.tangent).normalized;
+                        offset = Squash(offset, side, RootSpread, RootSquash);
+                        normal = Squash(outward, side, 1f / RootSpread, 1f / RootSquash).normalized;
+                    }
+                    data.AddVertex(node.position + offset, normal, new Vector2((float)j / radial, v));
                 }
             }
 
@@ -67,6 +83,14 @@ namespace TreeWizard
             {
                 tris.Add(lastRing + j); tris.Add(lastRing + j + 1); tris.Add(apex);
             }
+        }
+
+        static Vector3 Squash(Vector3 v, Vector3 side, float across, float up)
+        {
+            var s = Vector3.Dot(v, side);
+            v += side * (s * (across - 1f));
+            v.y *= up;
+            return v;
         }
 
         static void AddLeaf(MeshData data, in Leaf leaf, in LeafCell cell, LeafShape shape, Canopy canopy)

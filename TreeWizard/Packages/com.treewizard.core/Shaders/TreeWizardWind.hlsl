@@ -32,9 +32,10 @@ void TreeWizardWind_float(float3 PositionOS, float Strength, float Flutter, out 
     Out.y -= bend * bend * 0.5 / max(height, 0.5); // keeps the trunk roughly the same length as it bends
 
     // Branches: the further from the trunk, the more they bob, out of phase across the crown.
+    // Faded out over the first metre up, so roots and the base stay put on the ground.
     float reach = length(PositionOS.xz);
     float wave = sin(t * 2.1 + phase + reach * 0.8 + PositionOS.y * 0.5);
-    Out += (float3(0.0, 0.6, 0.0) + direction * 0.4) * wave * reach * 0.02 * strength;
+    Out += (float3(0.0, 0.6, 0.0) + direction * 0.4) * wave * reach * 0.02 * strength * saturate(PositionOS.y);
 
     // Leaves: a small, quick flutter with its own phase per vertex.
     float3 q = PositionOS * 4.0;

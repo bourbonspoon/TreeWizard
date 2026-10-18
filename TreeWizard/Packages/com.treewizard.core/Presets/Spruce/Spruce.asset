@@ -22,6 +22,14 @@ MonoBehaviour:
       flareHeight: 0.06
       crookedness: 0.04
       segments: 12
+    roots:
+      count: 5
+      length: 7
+      lengthVariance: 0.3
+      radius: 0.5
+      depth: 0.3
+      crookedness: 0.5
+      segments: 6
     branchLevels:
     - count: 34
       start: 0.14
