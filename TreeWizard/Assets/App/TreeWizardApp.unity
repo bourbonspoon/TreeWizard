@@ -160,12 +160,21 @@ MonoBehaviour:
       flareHeight: 0.1
       crookedness: 0.15
       segments: 10
+    roots:
+      count: 0
+      length: 6
+      lengthVariance: 0.3
+      radius: 0.5
+      depth: 0.3
+      crookedness: 0.5
+      segments: 6
     branchLevels:
     - count: 14
       start: 0.3
       end: 0.95
       angle: 55
       angleVariance: 10
+      flatten: 0
       length: 0.45
       lengthAtEnd: 0.4
       lengthVariance: 0.2
@@ -178,6 +187,7 @@ MonoBehaviour:
       end: 0.95
       angle: 40
       angleVariance: 10
+      flatten: 0
       length: 0.4
       lengthAtEnd: 0.6
       lengthVariance: 0.2
@@ -192,6 +202,7 @@ MonoBehaviour:
       size: 0.4
       sizeVariance: 0.3
       angle: 45
+      flatten: 0
       shape: 0
       outward: 0.5
       canopyNormals: 0.6
@@ -310,6 +321,7 @@ MonoBehaviour:
   presets:
   - {fileID: 11400000, guid: 8dfa2618338514ba7a118d0fa38dcca2, type: 2}
   - {fileID: 11400000, guid: 27576bd1d1b9c45f683171bb032ad908, type: 2}
+  - {fileID: 11400000, guid: a1240d6aa6567471aaf941181e79e79a, type: 2}
 --- !u!114 &1458113733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -554,6 +566,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1849561913}
   - component: {fileID: 1849561912}
+  - component: {fileID: 1849561914}
   m_Layer: 0
   m_Name: Sun
   m_TagString: Untagged
@@ -641,6 +654,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1849561914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1849561911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1965405896
 GameObject:
   m_ObjectHideFlags: 0

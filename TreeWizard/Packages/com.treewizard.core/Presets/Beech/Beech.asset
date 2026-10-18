@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1789ede45cbf141819cdbeff493ff98f, type: 3}
+  m_Name: Beech
+  m_EditorClassIdentifier: TreeWizard.Runtime::TreeWizard.TreePreset
+  definition:
+    seed: 1
+    trunk:
+      height: 9
+      radius: 0.28
+      tipRadius: 0.12
+      flare: 0.5
+      flareHeight: 0.06
+      crookedness: 0.06
+      segments: 12
+    roots:
+      count: 7
+      length: 6
+      lengthVariance: 0.3
+      radius: 0.55
+      depth: 0.3
+      crookedness: 0.5
+      segments: 6
+    branchLevels:
+    - count: 16
+      start: 0.28
+      end: 0.95
+      angle: 48
+      angleVariance: 10
+      flatten: 0
+      length: 0.58
+      lengthAtEnd: 0.35
+      lengthVariance: 0.2
+      radius: 0.55
+      gravity: 0.18
+      crookedness: 0.2
+      segments: 7
+    - count: 10
+      start: 0.25
+      end: 1
+      angle: 50
+      angleVariance: 12
+      flatten: 0.4
+      length: 0.42
+      lengthAtEnd: 0.6
+      lengthVariance: 0.25
+      radius: 0.55
+      gravity: 0.25
+      crookedness: 0.2
+      segments: 4
+    leaves:
+      enabled: 1
+      count: 9
+      start: 0.2
+      size: 0.6
+      sizeVariance: 0.25
+      angle: 50
+      flatten: 0.3
+      shape: 0
+      outward: 0.5
+      canopyNormals: 0.65
+      autumn: 0
+    mesh:
+      radialSegments: 8
+      minRadialSegments: 4
+  barkMaterial: {fileID: 2100000, guid: 27e7221532a454e70b5e7b518c9a9bca, type: 2}
+  leafMaterial: {fileID: 2100000, guid: 30bba66ee24dc41ab85efe8a81bc61b4, type: 2}
+  leafAtlas: {fileID: 11400000, guid: f82b72db733aa41ae9f72303c76bb332, type: 2}

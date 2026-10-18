@@ -9,7 +9,7 @@ A free, open-source procedural tree generator, in the spirit of SpeedTree.
 
 ## Features
 
-- Trunk, up to three branch levels and leaf cards, all driven by a seed. Oak and Spruce presets.
+- Trunk, up to three branch levels and leaf cards, all driven by a seed. Shallow surface roots. Oak, Spruce and Beech presets.
 - Leaf atlases sliced automatically from leaf or twig sheets, with summer/autumn mixing.
 - Bark textures with generated normal maps.
 - `TreeWizard/Tree` URP shader with wind (sway, branch bob, leaf flutter). Add **GameObject > TreeWizard > Wind** to a scene.

@@ -50,13 +50,16 @@ namespace TreeWizardDev
         public static void RenderTo(string outPath, string presetName, int seeds, float autumn, Action<TreeDefinition> tweak = null, bool baseCloseUp = false)
         {
             var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
-            var preset = AssetDatabase.LoadAssetAtPath<TreePreset>($"Packages/com.treewizard.core/Presets/{presetName}/{presetName}.asset");
-            if (preset == null)
+            var presetPath = $"Packages/com.treewizard.core/Presets/{presetName}/{presetName}.asset";
+            if (AssetDatabase.LoadAssetAtPath<TreePreset>(presetPath) == null)
                 throw new FileNotFoundException($"No preset named {presetName}");
 
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             try
             {
+                // Loaded after the new scene: opening it unloads unreferenced assets, which would leave a preset
+                // loaded before it without its leaf atlas.
+                var preset = AssetDatabase.LoadAssetAtPath<TreePreset>(presetPath);
                 var bounds = new Bounds();
                 var spacing = Mathf.Max(Spacing, preset.definition.trunk.height * 0.8f);
                 for (var i = 0; i < seeds; i++)

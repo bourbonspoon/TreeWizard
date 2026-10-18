@@ -49,6 +49,52 @@ namespace TreeWizardDev
                 Definition = Spruce,
                 LeafTint = new Color(0.62f, 0.72f, 0.72f), // spruce is a darker blue-green than the generated sheets
             },
+            new Species
+            {
+                Name = "Beech",
+                LeafSheetPrefixes = new[] { "beech-branch-tips" },
+                BarkFile = "Beech-bark-seamless-texture-271.png", // the smoothest of the three, as beech bark is
+                Definition = Beech,
+            },
+        };
+
+        static TreeDefinition Beech() => new TreeDefinition
+        {
+            // A smooth grey trunk under a broad, dense dome: limbs spread wide and shorten towards the top.
+            trunk = new TrunkSettings
+            {
+                height = 9f,
+                radius = 0.28f,
+                tipRadius = 0.12f,
+                flare = 0.5f,
+                flareHeight = 0.06f,
+                crookedness = 0.06f,
+                segments = 12,
+            },
+            roots = new RootSettings { count = 7, length = 6f, radius = 0.55f },
+            branchLevels = new[]
+            {
+                new BranchLevelSettings
+                {
+                    count = 16, start = 0.28f, end = 0.95f,
+                    angle = 48f, angleVariance = 10f,
+                    length = 0.58f, lengthAtEnd = 0.35f, lengthVariance = 0.2f,
+                    radius = 0.55f, gravity = 0.18f, crookedness = 0.2f, segments = 7,
+                },
+                // Twigs fan out to the sides and droop a little, in the layered sprays beech is known for.
+                new BranchLevelSettings
+                {
+                    count = 10, start = 0.25f, end = 1f,
+                    angle = 50f, angleVariance = 12f, flatten = 0.4f,
+                    length = 0.42f, lengthAtEnd = 0.6f, lengthVariance = 0.25f,
+                    radius = 0.55f, gravity = 0.25f, crookedness = 0.2f, segments = 4,
+                },
+            },
+            leaves = new LeafSettings
+            {
+                count = 9, start = 0.2f, size = 0.6f, sizeVariance = 0.25f, angle = 50f,
+                flatten = 0.3f, outward = 0.5f, canopyNormals = 0.65f,
+            },
         };
 
         static TreeDefinition Spruce() => new TreeDefinition
@@ -92,6 +138,9 @@ namespace TreeWizardDev
             },
             mesh = new MeshSettings { radialSegments = 8, minRadialSegments = 3 },
         };
+
+        /// <summary>Rebuilds one preset, e.g. "Beech", leaving the others' files untouched.</summary>
+        public static void Build(string name) => Build(All.Single(s => s.Name == name));
 
         [MenuItem("TreeWizard/Dev/Rebuild Presets")]
         public static void BuildFromMenu()
@@ -164,8 +213,7 @@ namespace TreeWizardDev
             var source = Path.Combine(RawTextures, species.BarkFile);
             if (File.Exists(source))
             {
-                var texture = new Texture2D(2, 2);
-                texture.LoadImage(File.ReadAllBytes(source));
+                var texture = TextureImport.Load(source, BarkSize); // larger sources only bloat the package: it's imported at this size
                 File.WriteAllBytes(assetPath, texture.EncodeToJPG(90));
 
                 var normals = new Texture2D(texture.width, texture.height, TextureFormat.RGB24, false);
@@ -181,6 +229,8 @@ namespace TreeWizardDev
             return AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
         }
 
+        const int BarkSize = 1024;
+
         static void ImportTiling(string path, bool normalMap)
         {
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
@@ -190,7 +240,7 @@ namespace TreeWizardDev
             importer.wrapMode = TextureWrapMode.Repeat;
             importer.mipmapEnabled = true;
             importer.anisoLevel = 4;
-            importer.maxTextureSize = 1024;
+            importer.maxTextureSize = BarkSize;
             importer.SaveAndReimport();
         }
 

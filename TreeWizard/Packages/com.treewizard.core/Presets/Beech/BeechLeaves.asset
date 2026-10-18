@@ -1,0 +1,256 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81bebe2ad68b7495e824ec721fa5be84, type: 3}
+  m_Name: BeechLeaves
+  m_EditorClassIdentifier: TreeWizard.Runtime::TreeWizard.LeafAtlas
+  texture: {fileID: 2800000, guid: 047f4db95cbe14754abdb73d48e985cb, type: 3}
+  cells:
+  - uvRect:
+      serializedVersion: 2
+      x: 0.36767578
+      y: 0.5986328
+      width: 0.17529297
+      height: 0.19580078
+    pivot: {x: 0.49362567, y: 0.012232416}
+    aspect: 0.89602447
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.5595703
+      y: 0.79589844
+      width: 0.18603516
+      height: 0.19433594
+    pivot: {x: 0.50775886, y: 0.012326657}
+    aspect: 0.9568567
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.79589844
+      width: 0.18652344
+      height: 0.19433594
+    pivot: {x: 0.5363951, y: 0.012307692}
+    aspect: 0.96
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.54296875
+      y: 0.5986328
+      width: 0.17138672
+      height: 0.1953125
+    pivot: {x: 0.5001636, y: 0.012269938}
+    aspect: 0.87883437
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.71435547
+      y: 0.5986328
+      width: 0.19433594
+      height: 0.19433594
+    pivot: {x: 0.5485362, y: 0.012307692}
+    aspect: 0.99846154
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.55322266
+      y: 0
+      width: 0.17285156
+      height: 0.19970703
+    pivot: {x: 0.45761245, y: 0.011994003}
+    aspect: 0.8665667
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.17578125
+      y: 0.20166016
+      width: 0.14794922
+      height: 0.19921875
+    pivot: {x: 0.53081805, y: 0.012012012}
+    aspect: 0.7417417
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.53564453
+      y: 0.4008789
+      width: 0.17626953
+      height: 0.19726562
+    pivot: {x: 0.5339559, y: 0.012121212}
+    aspect: 0.8924242
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.36621094
+      y: 0.4008789
+      width: 0.1694336
+      height: 0.1977539
+    pivot: {x: 0.55908334, y: 0.012102874}
+    aspect: 0.85627836
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.32373047
+      y: 0.20166016
+      width: 0.17138672
+      height: 0.19921875
+    pivot: {x: 0.46464315, y: 0.012012012}
+    aspect: 0.8588589
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.7260742
+      y: 0
+      width: 0.18066406
+      height: 0.19970703
+    pivot: {x: 0.5778146, y: 0.011994003}
+    aspect: 0.9055472
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.6738281
+      y: 0.20166016
+      width: 0.16259766
+      height: 0.19873047
+    pivot: {x: 0.5589319, y: 0.012048192}
+    aspect: 0.8177711
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.19042969
+      y: 0.5986328
+      width: 0.1772461
+      height: 0.19677734
+    pivot: {x: 0.5140511, y: 0.012158055}
+    aspect: 0.89969605
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.1953125
+      y: 0
+      width: 0.19189453
+      height: 0.2006836
+    pivot: {x: 0.5174207, y: 0.011940299}
+    aspect: 0.9567164
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.71191406
+      y: 0.4008789
+      width: 0.1772461
+      height: 0.19726562
+    pivot: {x: 0.50498015, y: 0.012139605}
+    aspect: 0.8983308
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.38720703
+      y: 0
+      width: 0.16601562
+      height: 0.19970703
+    pivot: {x: 0.471952, y: 0.011976048}
+    aspect: 0.8308383
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.18652344
+      y: 0.79589844
+      width: 0.18945312
+      height: 0.19433594
+    pivot: {x: 0.48905715, y: 0.012307692}
+    aspect: 0.97384614
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.37597656
+      y: 0.79589844
+      width: 0.18359375
+      height: 0.19433594
+    pivot: {x: 0.49874154, y: 0.012307692}
+    aspect: 0.94461536
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.20166016
+      width: 0.17578125
+      height: 0.19921875
+    pivot: {x: 0.49852747, y: 0.012012012}
+    aspect: 0.8828829
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.5986328
+      width: 0.19042969
+      height: 0.19726562
+    pivot: {x: 0.5156986, y: 0.012139605}
+    aspect: 0.9666161
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.4008789
+      width: 0.18554688
+      height: 0.1977539
+    pivot: {x: 0.52624077, y: 0.012102874}
+    aspect: 0.9379728
+    autumn: 1
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.18554688
+      y: 0.4008789
+      width: 0.18066406
+      height: 0.1977539
+    pivot: {x: 0.5738135, y: 0.012102874}
+    aspect: 0.91376704
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.4951172
+      y: 0.20166016
+      width: 0.17871094
+      height: 0.19873047
+    pivot: {x: 0.5678392, y: 0.012048192}
+    aspect: 0.89909637
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0.1953125
+      height: 0.20166016
+    pivot: {x: 0.552969, y: 0.011869436}
+    aspect: 0.96735907
+    autumn: 0
+    weight: 1
