@@ -159,7 +159,8 @@ namespace TreeWizard
                     width = cw,
                     height = ch,
                     pivot = new Vector2(((float)(stemX / stemCount) - r.xMin + Padding + 0.5f) / cw, (float)Padding / ch),
-                    autumn = !(hue >= 55f / 360f && hue <= 170f / 360f && saturation > 0.15f),
+                    // Greens through blue-greens (spruce) are summer; reds, oranges, yellows and browns are autumn.
+                    autumn = !(hue >= 55f / 360f && hue <= 200f / 360f && saturation > 0.12f),
                 });
             }
             return cutouts;

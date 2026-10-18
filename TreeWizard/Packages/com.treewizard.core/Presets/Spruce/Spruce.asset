@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1789ede45cbf141819cdbeff493ff98f, type: 3}
+  m_Name: Spruce
+  m_EditorClassIdentifier: TreeWizard.Runtime::TreeWizard.TreePreset
+  definition:
+    seed: 1
+    trunk:
+      height: 9
+      radius: 0.2
+      tipRadius: 0.04
+      flare: 0.35
+      flareHeight: 0.06
+      crookedness: 0.04
+      segments: 12
+    branchLevels:
+    - count: 34
+      start: 0.14
+      end: 0.97
+      angle: 82
+      angleVariance: 8
+      length: 0.28
+      lengthAtEnd: 0.08
+      lengthVariance: 0.15
+      radius: 0.4
+      gravity: 0.2
+      crookedness: 0.08
+      segments: 5
+    - count: 7
+      start: 0.15
+      end: 0.95
+      angle: 55
+      angleVariance: 12
+      length: 0.38
+      lengthAtEnd: 0.55
+      lengthVariance: 0.25
+      radius: 0.6
+      gravity: 0.1
+      crookedness: 0.15
+      segments: 3
+    leaves:
+      enabled: 1
+      count: 5
+      start: 0.05
+      size: 0.62
+      sizeVariance: 0.25
+      angle: 25
+      shape: 0
+      autumn: 0
+    mesh:
+      radialSegments: 8
+      minRadialSegments: 3
+  barkMaterial: {fileID: 2100000, guid: 7f559f647c1a740aea45df89a2208208, type: 2}
+  leafMaterial: {fileID: 2100000, guid: e02f261ce6a91471187f1c4686021961, type: 2}
+  leafAtlas: {fileID: 11400000, guid: 2f574ccbadbde4796993c79f3bf0c3da, type: 2}

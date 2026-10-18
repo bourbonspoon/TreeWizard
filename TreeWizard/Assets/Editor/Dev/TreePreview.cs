@@ -18,17 +18,17 @@ namespace TreeWizardDev
         const int TileWidth = 400;
         const int Height = 600;
         const float Spacing = 7f;
-        const string OakAtlas = "Packages/com.treewizard.core/Presets/Oak/OakLeaves.asset";
 
         public static void Render()
         {
             try
             {
                 var outPath = Arg("-previewOut") ?? "TreePreview.png";
+                var preset = Arg("-previewPreset") ?? "Oak";
                 var seeds = int.TryParse(Arg("-previewSeeds"), out var n) ? Mathf.Max(1, n) : 4;
                 var autumn = float.TryParse(Arg("-previewAutumn"), System.Globalization.NumberStyles.Float,
                     System.Globalization.CultureInfo.InvariantCulture, out var a) ? a : 0f;
-                RenderTo(outPath, seeds, autumn);
+                RenderTo(outPath, preset, seeds, autumn);
                 EditorApplication.Exit(0);
             }
             catch (Exception e)
@@ -39,62 +39,72 @@ namespace TreeWizardDev
         }
 
         [MenuItem("TreeWizard/Dev/Render Preview PNG")]
-        static void RenderFromMenu() => RenderTo(Path.GetFullPath("../Scratch/TreePreview.png"), 4, 0f);
+        static void RenderFromMenu() => RenderTo(Path.GetFullPath("../Scratch/TreePreview.png"), "Oak", 4, 0f);
 
-        static void RenderTo(string outPath, int seeds, float autumn)
+        /// <summary>
+        /// Renders a row of trees from the named preset (one per seed) in a temporary scene, then
+        /// reopens the scene that was open before.
+        /// </summary>
+        public static void RenderTo(string outPath, string presetName, int seeds, float autumn)
         {
+            var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+            var preset = AssetDatabase.LoadAssetAtPath<TreePreset>($"Packages/com.treewizard.core/Presets/{presetName}/{presetName}.asset");
+            if (preset == null)
+                throw new FileNotFoundException($"No preset named {presetName}");
+
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-
-            var bark = Matte(new Color(0.33f, 0.24f, 0.17f));
-            var ground = Matte(new Color(0.45f, 0.43f, 0.38f));
-            var atlas = AssetDatabase.LoadAssetAtPath<LeafAtlas>(OakAtlas);
-            var leaf = Matte(atlas != null ? Color.white : new Color(0.22f, 0.42f, 0.14f));
-            if (atlas != null)
+            try
             {
-                leaf.SetTexture("_BaseMap", atlas.texture);
-                leaf.SetFloat("_AlphaClip", 1f);
-                leaf.SetFloat("_Cutoff", 0.5f);
-                leaf.EnableKeyword("_ALPHATEST_ON");
-            }
+                var bounds = new Bounds();
+                var spacing = Mathf.Max(Spacing, preset.definition.trunk.height * 0.8f);
+                for (var i = 0; i < seeds; i++)
+                {
+                    var tree = new GameObject($"Tree {i + 1}").AddComponent<TreeWizardTree>();
+                    tree.transform.position = new Vector3(i * spacing, 0f, 0f);
+                    tree.ApplyPreset(preset);
+                    tree.definition.seed = i + 1;
+                    tree.definition.leaves.autumn = autumn;
+                    tree.Rebuild();
+                    var b = tree.GetComponent<MeshRenderer>().bounds;
+                    if (i == 0)
+                        bounds = b;
+                    else
+                        bounds.Encapsulate(b);
+                    Debug.Log($"[TreePreview] {presetName} seed {i + 1}: {tree.Mesh.vertexCount} verts, {tree.Mesh.triangles.Length / 3} tris");
+                }
 
-            for (var i = 0; i < seeds; i++)
+                var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                floor.transform.position = new Vector3(bounds.center.x, 0f, 0f);
+                floor.transform.localScale = new Vector3(bounds.size.x * 0.2f + 2f, 1f, 4f);
+                floor.GetComponent<MeshRenderer>().sharedMaterial = Matte(new Color(0.45f, 0.43f, 0.38f));
+
+                var sun = new GameObject("Sun").AddComponent<Light>();
+                sun.type = LightType.Directional;
+                sun.intensity = 1.6f;
+                sun.shadows = LightShadows.Soft;
+                sun.transform.rotation = Quaternion.Euler(45f, -35f, 0f);
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                RenderSettings.ambientLight = new Color(0.45f, 0.5f, 0.6f);
+
+                var width = TileWidth * seeds;
+                var cam = new GameObject("Camera").AddComponent<Camera>();
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color(0.62f, 0.75f, 0.88f);
+                cam.fieldOfView = 32f;
+                cam.aspect = (float)width / Height;
+                var halfFov = Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                var distance = Mathf.Max(bounds.extents.y * 1.1f, bounds.extents.x * 1.05f / cam.aspect) / halfFov + bounds.extents.z;
+                cam.transform.position = new Vector3(bounds.center.x, bounds.center.y * 0.8f, -distance);
+                cam.transform.LookAt(new Vector3(bounds.center.x, bounds.center.y, 0f));
+                cam.farClipPlane = distance * 3f;
+
+                WriteRender(cam, width, Height, outPath);
+            }
+            finally
             {
-                var tree = new GameObject($"Tree {i + 1}").AddComponent<TreeWizardTree>();
-                tree.transform.position = new Vector3(i * Spacing, 0f, 0f);
-                tree.definition.seed = i + 1;
-                tree.barkMaterial = bark;
-                tree.leafMaterial = leaf;
-                tree.leafAtlas = atlas;
-                tree.definition.leaves.autumn = autumn;
-                tree.Rebuild();
-                Debug.Log($"[TreePreview] seed {i + 1}: {tree.Mesh.vertexCount} verts, {tree.Mesh.triangles.Length / 3} tris");
+                if (!string.IsNullOrEmpty(previous))
+                    EditorSceneManager.OpenScene(previous);
             }
-
-            var centerX = (seeds - 1) * Spacing * 0.5f;
-            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            floor.transform.position = new Vector3(centerX, 0f, 0f);
-            floor.transform.localScale = new Vector3(seeds * Spacing * 0.2f, 1f, 3f);
-            floor.GetComponent<MeshRenderer>().sharedMaterial = ground;
-
-            var sun = new GameObject("Sun").AddComponent<Light>();
-            sun.type = LightType.Directional;
-            sun.intensity = 1.6f;
-            sun.shadows = LightShadows.Soft;
-            sun.transform.rotation = Quaternion.Euler(45f, -35f, 0f);
-            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.45f, 0.5f, 0.6f);
-
-            var width = TileWidth * seeds;
-            var cam = new GameObject("Camera").AddComponent<Camera>();
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.62f, 0.75f, 0.88f);
-            cam.fieldOfView = 32f;
-            cam.aspect = (float)width / Height;
-            var distance = Mathf.Max(5.5f, seeds * Spacing * 0.5f / cam.aspect) / Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-            cam.transform.position = new Vector3(centerX, 3.5f, -distance);
-            cam.transform.LookAt(new Vector3(centerX, 3.8f, 0f));
-
-            WriteRender(cam, width, Height, outPath);
         }
 
         /// <summary>Renders <paramref name="target"/> from a 3/4 view with a temporary camera. Works while the Editor is unfocused.</summary>

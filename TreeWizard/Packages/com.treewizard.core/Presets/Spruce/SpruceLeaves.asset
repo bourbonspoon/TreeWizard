@@ -1,0 +1,196 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81bebe2ad68b7495e824ec721fa5be84, type: 3}
+  m_Name: SpruceLeaves
+  m_EditorClassIdentifier: TreeWizard.Runtime::TreeWizard.LeafAtlas
+  texture: {fileID: 2800000, guid: a272facb9dd4043e89e4fdd7be77bbd2, type: 3}
+  cells:
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.7524414
+      width: 0.1796875
+      height: 0.2421875
+    pivot: {x: 0.49095976, y: 0.012738854}
+    aspect: 0.74044585
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.71777344
+      y: 0.50439453
+      width: 0.18310547
+      height: 0.24365234
+    pivot: {x: 0.50333554, y: 0.012678289}
+    aspect: 0.7511886
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.35205078
+      y: 0.7524414
+      width: 0.19091797
+      height: 0.23583984
+    pivot: {x: 0.51417005, y: 0.01309329}
+    aspect: 0.80851066
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.34375
+      y: 0.50439453
+      width: 0.18164062
+      height: 0.24414062
+    pivot: {x: 0.50707436, y: 0.012638231}
+    aspect: 0.7424961
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.1796875
+      y: 0.7524414
+      width: 0.17236328
+      height: 0.2397461
+    pivot: {x: 0.5190583, y: 0.012882448}
+    aspect: 0.71819645
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.17138672
+      y: 0.50439453
+      width: 0.17236328
+      height: 0.24560547
+    pivot: {x: 0.5103589, y: 0.012578616}
+    aspect: 0.7028302
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.2553711
+      width: 0.15771484
+      height: 0.24902344
+    pivot: {x: 0.48388538, y: 0.012403101}
+    aspect: 0.63410854
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0.50439453
+      width: 0.17138672
+      height: 0.24804688
+    pivot: {x: 0.49444202, y: 0.012461059}
+    aspect: 0.69158876
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.7109375
+      y: 0.2553711
+      width: 0.18408203
+      height: 0.24804688
+    pivot: {x: 0.49495137, y: 0.012461059}
+    aspect: 0.7429907
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.7241211
+      y: 0
+      width: 0.1616211
+      height: 0.25
+    pivot: {x: 0.47705486, y: 0.012345679}
+    aspect: 0.64660496
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.15771484
+      y: 0.2553711
+      width: 0.15527344
+      height: 0.24902344
+    pivot: {x: 0.4898255, y: 0.012403101}
+    aspect: 0.6232558
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.57714844
+      y: 0
+      width: 0.14697266
+      height: 0.25
+    pivot: {x: 0.4694664, y: 0.012345679}
+    aspect: 0.587963
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.34765625
+      y: 0
+      width: 0.22949219
+      height: 0.25341797
+    pivot: {x: 0.49360412, y: 0.0121951215}
+    aspect: 0.9070122
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.1352539
+      y: 0
+      width: 0.21240234
+      height: 0.25390625
+    pivot: {x: 0.49378794, y: 0.012158055}
+    aspect: 0.8358663
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0.1352539
+      height: 0.2553711
+    pivot: {x: 0.49491236, y: 0.012084592}
+    aspect: 0.5302115
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.31298828
+      y: 0.2553711
+      width: 0.19628906
+      height: 0.24853516
+    pivot: {x: 0.4839239, y: 0.0124223605}
+    aspect: 0.78881985
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.5253906
+      y: 0.50439453
+      width: 0.19238281
+      height: 0.24414062
+    pivot: {x: 0.5151859, y: 0.012638231}
+    aspect: 0.78830963
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.50927734
+      y: 0.2553711
+      width: 0.20166016
+      height: 0.24804688
+    pivot: {x: 0.49256516, y: 0.01244168}
+    aspect: 0.8118196
+    autumn: 0
+    weight: 1
