@@ -2,7 +2,16 @@
   <ui:Style src="App.uss" />
   <ui:VisualElement name="appRoot" class="app" picking-mode="Ignore">
     <ui:VisualElement name="sidebar" class="sidebar">
-      <ui:Label text="TreeWizard" class="sidebar__title" />
+      <ui:VisualElement class="title-row">
+        <ui:Label text="TreeWizard" class="sidebar__title" />
+        <ui:Label name="designLabel" class="title-row__design" />
+        <ui:Button name="undoButton" tooltip="Undo (Cmd/Ctrl+Z)" class="title-row__button">
+          <ui:VisualElement class="title-row__icon title-row__icon--undo" />
+        </ui:Button>
+        <ui:Button name="redoButton" tooltip="Redo (Shift+Cmd/Ctrl+Z)" class="title-row__button">
+          <ui:VisualElement class="title-row__icon title-row__icon--redo" />
+        </ui:Button>
+      </ui:VisualElement>
       <ui:VisualElement class="toolbar">
         <ui:Button name="openButton" text="Open…" class="toolbar__button" />
         <ui:Button name="saveButton" text="Save…" class="toolbar__button" />

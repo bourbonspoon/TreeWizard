@@ -45,6 +45,14 @@ namespace TreeWizard.App
         PanelSettings _panel;
         float _zoom = 1f;
         float _nextScaleCheck;
+        readonly SnapshotHistory _history = new SnapshotHistory();
+        string _savedState;      // the design as last saved or opened, to tell whether there are unsaved changes
+        int _quiet;              // while above 0, changes are being restored or loaded rather than made: not recorded
+        bool _allowQuit;
+        ConfirmDialog _dialog;
+        Label _designLabel;
+        Button _undoButton, _redoButton;
+        ScrollView _settingsScroll;
 
         void OnEnable()
         {
@@ -57,8 +65,19 @@ namespace TreeWizard.App
             var root = document.rootVisualElement;
 
             _settings = new TreeSettingsPanel();
-            _settings.Changed += tree.MarkDirty;
+            _settings.Changed += () =>
+            {
+                tree.MarkDirty();
+                RecordChange(true); // sliders send a change per step of a drag; a drag is one undo step
+            };
             root.Q("settings").Add(_settings);
+            _settingsScroll = root.Q<ScrollView>("settingsScroll");
+
+            _designLabel = root.Q<Label>("designLabel");
+            _undoButton = root.Q<Button>("undoButton");
+            _redoButton = root.Q<Button>("redoButton");
+            _undoButton.clicked += Undo;
+            _redoButton.clicked += Redo;
 
             _preset = root.Q<DropdownField>("preset");
             _preset.choices = presets.Select(p => p.name).ToList();
@@ -81,7 +100,11 @@ namespace TreeWizard.App
             _status = root.Q<Label>("status");
 
             _textures = new CustomTextures(tree);
-            _textures.Changed += ShowTextures;
+            _textures.Changed += () =>
+            {
+                ShowTextures();
+                RecordChange(false);
+            };
             _barkValue = root.Q<Label>("barkValue");
             _barkNormalValue = root.Q<Label>("barkNormalValue");
             _leavesValue = root.Q<Label>("leavesValue");
@@ -96,14 +119,22 @@ namespace TreeWizard.App
             _browser.SetRecentFolders(PlayerPrefs.GetString(RecentFoldersKey, "").Split('\n'));
             _browser.RecentFoldersChanged += () => PlayerPrefs.SetString(RecentFoldersKey, string.Join("\n", _browser.RecentFolders));
             root.Add(_browser);
+            _dialog = new ConfirmDialog();
+            root.Add(_dialog);
 
             if (presets.Count > 0)
                 _preset.index = 0; // applies it through the callback
             else
                 _settings.Definition = tree.definition;
+            ResetHistory();
+            Application.wantsToQuit += ConfirmQuit;
         }
 
-        void OnDisable() => _textures?.Dispose();
+        void OnDisable()
+        {
+            Application.wantsToQuit -= ConfirmQuit;
+            _textures?.Dispose();
+        }
 
         void Start()
         {
@@ -177,6 +208,28 @@ namespace TreeWizard.App
             }
             _textures.Clear();
 
+            // Undo and redo step through changes, and the design reports unsaved changes until saved.
+            ResetHistory();
+            var height = tree.definition.trunk.height;
+            tree.definition.trunk.height = height + 2f;
+            RecordChange(false);
+            if (!IsModified || !_designLabel.text.EndsWith("\u2022"))
+                Debug.LogError("[SmokeTest] a change didn't mark the design as modified");
+            Undo();
+            yield return null;
+            if (!Mathf.Approximately(tree.definition.trunk.height, height) || IsModified)
+                Debug.LogError($"[SmokeTest] undo gave height {tree.definition.trunk.height}, expected {height}");
+            Redo();
+            yield return null;
+            if (!Mathf.Approximately(tree.definition.trunk.height, height + 2f))
+                Debug.LogError($"[SmokeTest] redo gave height {tree.definition.trunk.height}, expected {height + 2f}");
+            ConfirmDiscard("quitting", () => { });
+            yield return new WaitForSeconds(0.5f);
+            ScreenCapture.CaptureScreenshot(Path.Combine(folder, "Unsaved.png"));
+            yield return new WaitForSeconds(0.5f);
+            _dialog.Cancel();
+            Undo();
+
             _browser.SaveFile("Save Design", folder, "Smoke" + TreeDesignFile.Extension, new[] { DesignFilter }, _ => { });
             yield return new WaitForSeconds(1f);
             ScreenCapture.CaptureScreenshot(Path.Combine(folder, "FileBrowser.png"));
@@ -184,6 +237,7 @@ namespace TreeWizard.App
             _browser.Cancel();
 
             Debug.Log(failed ? "[SmokeTest] FAILED" : "[SmokeTest] passed");
+            _allowQuit = true;
             Application.Quit(failed ? 1 : 0);
         }
 
@@ -257,10 +311,26 @@ namespace TreeWizard.App
             var keyboard = Keyboard.current;
             if (keyboard == null)
                 return;
-            if (keyboard.fKey.wasPressedThisFrame && !_browser.IsOpen && !IsTyping())
+            if (keyboard.fKey.wasPressedThisFrame && !_browser.IsOpen && !_dialog.IsOpen && !IsTyping())
                 FrameTree();
             if (keyboard.leftCommandKey.isPressed || keyboard.rightCommandKey.isPressed || keyboard.ctrlKey.isPressed)
             {
+                if (!_browser.IsOpen && !_dialog.IsOpen)
+                {
+                    if (keyboard.zKey.wasPressedThisFrame)
+                    {
+                        if (keyboard.shiftKey.isPressed)
+                            Redo();
+                        else
+                            Undo();
+                    }
+                    else if (keyboard.yKey.wasPressedThisFrame)
+                        Redo();
+                    else if (keyboard.sKey.wasPressedThisFrame)
+                        Save();
+                    else if (keyboard.oKey.wasPressedThisFrame)
+                        Open();
+                }
                 if (keyboard.equalsKey.wasPressedThisFrame || keyboard.numpadPlusKey.wasPressedThisFrame)
                     Zoom(1);
                 else if (keyboard.minusKey.wasPressedThisFrame || keyboard.numpadMinusKey.wasPressedThisFrame)
@@ -299,6 +369,7 @@ namespace TreeWizard.App
             _settings.Definition = tree.definition;
             _designName = presets[index].name;
             FrameTree();
+            RecordChange(false);
         }
 
         void FrameTree()
@@ -307,66 +378,196 @@ namespace TreeWizard.App
                 orbit.Frame(renderer.bounds);
         }
 
-        void Save() =>
+        void Save() => Save(null);
+
+        /// <param name="then">Runs after a successful save, e.g. the open or quit that asked for it.</param>
+        void Save(Action then) =>
             _browser.SaveFile("Save Design", DefaultFolder(), _designName + TreeDesignFile.Extension, new[] { DesignFilter }, path =>
             {
                 TreeDesignFile.Save(path, _preset.value, tree.definition, _textures.Files);
                 Remember(path);
+                _savedState = Snapshot();
+                ShowDesignState();
                 ShowStatus($"Saved {Path.GetFileName(path)}");
+                then?.Invoke();
             });
 
-        void Open() =>
+        void Open() => ConfirmDiscard("opening another design", () =>
             _browser.OpenFile("Open Design", DefaultFolder(), new[] { DesignFilter }, path =>
             {
                 var design = TreeDesignFile.Load(path);
                 var index = presets.FindIndex(p => p.name == design.preset);
                 if (index >= 0)
                     _preset.SetValueWithoutNotify(presets[index].name);
-                var preset = index >= 0 ? presets[index] : presets.FirstOrDefault();
-                _textures.Clear();
-                if (preset != null)
-                    tree.ApplyPreset(preset); // materials and leaf atlas
-                tree.definition = design.definition;
-                _textures.Apply(preset);
-                tree.MarkDirty();
-                _settings.Definition = tree.definition;
                 Remember(path);
-                LoadTextures(design.textures, $"Opened {Path.GetFileName(path)}");
-            });
+                LoadDesign(index >= 0 ? presets[index] : presets.FirstOrDefault(), design, $"Opened {Path.GetFileName(path)}");
+            }));
 
-        // A design's own textures. Missing files fall back to the preset's, and the status says which.
-        async void LoadTextures(TreeDesignFile.TextureFiles files, string opened)
+        // Opening starts a fresh history once the design's own textures have loaded.
+        async void LoadDesign(TreePreset preset, TreeDesignFile design, string opened)
         {
-            var missing = new List<string>();
+            _quiet++;
             try
             {
-                if (!string.IsNullOrEmpty(files.bark))
-                {
-                    if (File.Exists(files.bark))
-                    {
-                        var normal = files.barkNormal;
-                        if (!string.IsNullOrEmpty(normal) && !File.Exists(normal))
-                        {
-                            missing.Add(Path.GetFileName(normal));
-                            normal = "";
-                        }
-                        await _textures.SetBark(files.bark, normal);
-                    }
-                    else
-                    {
-                        missing.Add(Path.GetFileName(files.bark));
-                    }
-                }
-                var sheets = files.leafSheets.Where(File.Exists).ToList();
-                missing.AddRange(files.leafSheets.Where(p => !File.Exists(p)).Select(Path.GetFileName));
-                if (sheets.Count > 0)
-                    await _textures.SetLeaves(sheets);
+                ShowDesign(preset, design.definition);
+                var missing = await MatchTextures(design.textures);
                 ShowStatus(missing.Count == 0 ? opened : $"{opened}, but couldn't find {string.Join(", ", missing)}; using the preset's textures instead", missing.Count == 0 ? 5f : 10f);
             }
             catch (Exception e)
             {
                 ShowStatus($"{opened}, but its textures couldn't be loaded: {e.Message}", 10f);
             }
+            finally
+            {
+                _quiet--;
+                ResetHistory();
+            }
+        }
+
+        // The preset's materials under the given settings, keeping the custom textures already loaded.
+        void ShowDesign(TreePreset preset, TreeDefinition definition)
+        {
+            if (preset != null)
+                tree.ApplyPreset(preset);
+            tree.definition = definition;
+            _textures.Apply(preset);
+            tree.MarkDirty();
+            var scroll = _settingsScroll.scrollOffset;
+            _settings.Definition = tree.definition;
+            _settingsScroll.schedule.Execute(() => _settingsScroll.scrollOffset = scroll); // after the rebuilt panel's layout
+        }
+
+        /// <summary>
+        /// Loads or clears custom textures until they match <paramref name="files"/>. Files that have gone missing fall back
+        /// to the preset's; their names are returned.
+        /// </summary>
+        async System.Threading.Tasks.Task<List<string>> MatchTextures(TreeDesignFile.TextureFiles files)
+        {
+            var missing = new List<string>();
+            var bark = files.bark ?? "";
+            var normal = files.barkNormal ?? "";
+            if (bark != _textures.BarkPath || normal != _textures.BarkNormalPath)
+            {
+                if (bark.Length > 0 && !File.Exists(bark))
+                {
+                    missing.Add(Path.GetFileName(bark));
+                    bark = "";
+                }
+                if (normal.Length > 0 && !File.Exists(normal))
+                {
+                    missing.Add(Path.GetFileName(normal));
+                    normal = "";
+                }
+                if (bark.Length > 0)
+                    await _textures.SetBark(bark, normal);
+                else if (_textures.HasBark)
+                    _textures.ClearBark();
+            }
+
+            var sheets = files.leafSheets ?? Array.Empty<string>();
+            if (!sheets.SequenceEqual(_textures.LeafSheetPaths))
+            {
+                var found = sheets.Where(File.Exists).ToList();
+                missing.AddRange(sheets.Where(p => !File.Exists(p)).Select(Path.GetFileName));
+                if (found.Count > 0)
+                    await _textures.SetLeaves(found);
+                else if (_textures.HasLeaves)
+                    _textures.ClearLeaves();
+            }
+            return missing;
+        }
+
+        /// <summary>The whole design as one string: what undo steps between, and what tells whether it's been saved.</summary>
+        string Snapshot() => JsonUtility.ToJson(new TreeDesignFile { preset = _preset.value, definition = tree.definition, textures = _textures.Files });
+
+        bool IsModified => Snapshot() != _savedState;
+
+        void RecordChange(bool mergeable)
+        {
+            if (_quiet > 0)
+                return;
+            _history.Record(Snapshot(), Time.unscaledTime, mergeable);
+            ShowDesignState();
+        }
+
+        void ResetHistory()
+        {
+            _history.Reset(Snapshot());
+            _savedState = _history.Current;
+            ShowDesignState();
+        }
+
+        void ShowDesignState()
+        {
+            _designLabel.text = IsModified ? _designName + " \u2022" : _designName;
+            _designLabel.tooltip = IsModified ? "Unsaved changes" : "";
+            _undoButton.SetEnabled(_history.CanUndo);
+            _redoButton.SetEnabled(_history.CanRedo);
+        }
+
+        void Undo() => Restore(BlurAnd(_history.Undo));
+
+        void Redo() => Restore(BlurAnd(_history.Redo));
+
+        // A text field being typed in commits its value when it loses focus, so that edit is recorded before stepping.
+        string BlurAnd(Func<string> step)
+        {
+            (GetComponent<UIDocument>().rootVisualElement.focusController?.focusedElement as VisualElement)?.Blur();
+            return step();
+        }
+
+        async void Restore(string state)
+        {
+            if (state == null)
+                return;
+            var design = JsonUtility.FromJson<TreeDesignFile>(state);
+            var index = presets.FindIndex(p => p.name == design.preset);
+            if (index >= 0)
+                _preset.SetValueWithoutNotify(presets[index].name);
+            _quiet++;
+            try
+            {
+                ShowDesign(index >= 0 ? presets[index] : null, design.definition);
+                ShowDesignState();
+                var missing = await MatchTextures(design.textures);
+                if (missing.Count > 0)
+                    ShowStatus($"Couldn't find {string.Join(", ", missing)}", 8f);
+            }
+            catch (Exception e)
+            {
+                ShowStatus($"Couldn't restore the textures: {e.Message}", 8f);
+            }
+            finally
+            {
+                _quiet--;
+                ShowDesignState();
+            }
+        }
+
+        /// <summary>Asks whether to save first when there are unsaved changes, then carries on unless cancelled.</summary>
+        void ConfirmDiscard(string doing, Action proceed)
+        {
+            if (!IsModified)
+            {
+                proceed();
+                return;
+            }
+            _dialog.Show("Unsaved Changes", $"Save changes to {_designName} before {doing}?",
+                new ConfirmDialog.Choice("Don't Save", proceed),
+                new ConfirmDialog.Choice("Cancel", null, cancel: true),
+                new ConfirmDialog.Choice("Save…", () => Save(proceed), primary: true));
+        }
+
+        bool ConfirmQuit()
+        {
+            if (_allowQuit || !IsModified)
+                return true;
+            ConfirmDiscard("quitting", () =>
+            {
+                _allowQuit = true;
+                Application.Quit();
+            });
+            return false;
         }
 
         void ChooseBark() =>

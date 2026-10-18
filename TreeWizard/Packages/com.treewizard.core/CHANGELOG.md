@@ -14,6 +14,7 @@ All notable changes to this package are documented here. The format follows [Kee
 - **Flatten** setting on branch levels and leaves: spreads them flat to either side of their parent instead of spiralling around it, for layered conifer sprays and fern-like fronds.
 - Leaf **Canopy Normals** setting: bends leaf lighting out from the crown's centre so canopies shade as one rounded mass. Carried through FBX export.
 - Autumn setting: the share of leaves drawn from an atlas's autumn-coloured cells. Greens through blue-greens count as summer.
+- `SnapshotHistory`: undo/redo over whole-document snapshots, merging quick runs of changes such as a slider drag into one step. `TreeSettingsPanel` now keeps sections open or closed across rebuilds.
 - `TextureImport`: loads PNG or JPG bark, normal maps and leaf sheets at runtime, for apps where people bring their own textures. Leaf atlases get mipmaps that keep the same share of solid pixels at every level, so alpha-clipped leaves don't thin out with distance.
 - Oak leaf atlas preset (36 summer and autumn twigs).
 - Spruce preset: conical tiered shape with flat, drooping twigs covered in small spruce tips (fishbone style), 18 spruce sprays, spruce bark.

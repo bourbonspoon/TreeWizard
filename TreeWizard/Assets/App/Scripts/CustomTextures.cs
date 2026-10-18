@@ -121,6 +121,22 @@ namespace TreeWizard.App
             return (sliced.cells.Count, opaque);
         }
 
+        /// <summary>Back to the preset's bark.</summary>
+        public void ClearBark()
+        {
+            ResetBark();
+            Refresh();
+            Changed?.Invoke();
+        }
+
+        /// <summary>Back to the preset's leaves.</summary>
+        public void ClearLeaves()
+        {
+            ResetLeaves();
+            Refresh();
+            Changed?.Invoke();
+        }
+
         /// <summary>Back to the preset's textures.</summary>
         public void Clear()
         {

@@ -27,7 +27,56 @@
 .sidebar__title {
   font-size: 20px;
   -unity-font-style: bold;
+}
+
+.title-row {
+  flex-direction: row;
+  flex-shrink: 0;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.sidebar .title-row__design {
+  flex-grow: 1;
+  flex-shrink: 1;
+  margin-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-dim);
+}
+
+.title-row__button {
+  width: 28px;
+  height: 26px;
+  margin: 0 0 0 2px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border-width: 0;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.title-row__button:hover {
+  background-color: var(--divider);
+}
+
+.title-row__icon {
+  width: 16px;
+  height: 16px;
+  -unity-background-image-tint-color: var(--text);
+}
+
+.title-row__button:disabled .title-row__icon {
+  opacity: 0.3;
+}
+
+.title-row__icon--undo {
+  background-image: url("Icons/undo.svg");
+}
+
+.title-row__icon--redo {
+  background-image: url("Icons/redo.svg");
 }
 
 .toolbar {
@@ -136,4 +185,68 @@
 
 .status--visible {
   display: flex;
+}
+
+.confirm {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+.confirm--hidden {
+  display: none;
+}
+
+.confirm__window {
+  width: 440px;
+  max-width: 90%;
+  padding: 16px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: var(--divider);
+  background-color: var(--window-bg);
+}
+
+.confirm .unity-label {
+  color: var(--text);
+}
+
+.confirm__title {
+  font-size: 16px;
+  -unity-font-style: bold;
+  margin-bottom: 8px;
+}
+
+.confirm__message {
+  white-space: normal;
+  margin-bottom: 16px;
+}
+
+.confirm__buttons {
+  flex-direction: row;
+}
+
+.confirm__spacer {
+  flex-grow: 1;
+}
+
+.confirm__button {
+  min-width: 90px;
+  height: 26px;
+  margin: 0 0 0 6px;
+}
+
+.confirm__button--primary {
+  background-color: var(--accent);
+  color: rgb(255, 255, 255);
+  -unity-font-style: bold;
+}
+
+.confirm__button--primary:hover {
+  background-color: var(--accent-hover);
 }

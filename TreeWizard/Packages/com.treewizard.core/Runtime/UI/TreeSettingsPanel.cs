@@ -27,6 +27,7 @@ namespace TreeWizard.UI
         readonly List<Action> _refreshers = new List<Action>();
         readonly List<Action> _levelRefreshers = new List<Action>();
         VisualElement _levels;
+        readonly Dictionary<string, bool> _expanded = new Dictionary<string, bool>();
         Button _addLevel;
         Button _removeLevel;
 
@@ -199,9 +200,15 @@ namespace TreeWizard.UI
             return control;
         }
 
-        static Foldout MakeFoldout(string title, bool expanded)
+        // Remembers which sections were open, so rebuilding (a new definition, undo) doesn't fold everything back.
+        Foldout MakeFoldout(string title, bool expanded)
         {
-            var foldout = new Foldout { text = title, value = expanded };
+            var foldout = new Foldout { text = title, value = _expanded.TryGetValue(title, out var open) ? open : expanded };
+            foldout.RegisterValueChangedCallback(e =>
+            {
+                if (e.target == foldout) // checkboxes inside send the same event type up through it
+                    _expanded[title] = e.newValue;
+            });
             foldout.AddToClassList(SectionUssClassName);
             return foldout;
         }
