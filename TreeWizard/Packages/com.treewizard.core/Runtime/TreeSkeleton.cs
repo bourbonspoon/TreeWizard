@@ -145,6 +145,8 @@ namespace TreeWizard
                 var azimuth = azimuthOffset + i * GoldenAngle + rng.Range(-15f, 15f);
                 var angle = s.angle + rng.Range(-s.angleVariance, s.angleVariance);
                 var direction = AwayFrom(at, azimuth, angle);
+                if (s.flatten > 0f)
+                    direction = Flatten(at, direction, i % 2 == 0 ? 1f : -1f, s.flatten);
 
                 var length = parent.Length * s.length * Mathf.Lerp(1f, s.lengthAtEnd, f)
                              * (1f + rng.Range(-1f, 1f) * s.lengthVariance);
@@ -172,6 +174,8 @@ namespace TreeWizard
 
                 var azimuth = azimuthOffset + i * GoldenAngle + rng.Range(-15f, 15f);
                 var up = AwayFrom(at, azimuth, s.angle + rng.Range(-15f, 15f));
+                if (s.flatten > 0f)
+                    up = Flatten(at, up, i % 2 == 0 ? 1f : -1f, s.flatten);
 
                 // Turn the card to face somewhere between the sky and away from the trunk, then roll it a little.
                 var away = new Vector3(at.position.x, 0f, at.position.z);
@@ -179,7 +183,7 @@ namespace TreeWizard
                 var width = Vector3.Cross(facing, up); // makes the card normal, cross(up, width), point along facing
                 if (width.sqrMagnitude < 1e-4f)
                     width = Vector3.Cross(Vector3.right, up);
-                width = Quaternion.AngleAxis(rng.Range(-30f, 30f), up) * width.normalized;
+                width = Quaternion.AngleAxis(rng.Range(-30f, 30f) * (1f - s.flatten), up) * width.normalized;
 
                 leaves.Add(new Leaf
                 {
@@ -245,6 +249,19 @@ namespace TreeWizard
             var side = Mathf.Cos(az) * at.normal + Mathf.Sin(az) * Vector3.Cross(at.tangent, at.normal);
             var a = angle * Mathf.Deg2Rad;
             return (Mathf.Cos(a) * at.tangent + Mathf.Sin(a) * side).normalized;
+        }
+
+        /// <summary>
+        /// Swings a leaf or child branch direction toward the branch's horizontal plane on the given side, keeping its
+        /// angle from the branch, so alternate ones spread flat to either side.
+        /// </summary>
+        static Vector3 Flatten(in BranchNode at, Vector3 direction, float sideSign, float amount)
+        {
+            var side = Vector3.Cross(Vector3.up, at.tangent);
+            if (side.sqrMagnitude < 1e-6f)
+                return direction; // a vertical branch has no horizontal plane
+            var flat = Vector3.SlerpUnclamped(at.tangent, side.normalized * sideSign, Vector3.Angle(at.tangent, direction) / 90f);
+            return Vector3.Slerp(direction, flat, amount).normalized;
         }
 
         static Branch Grow(int level, int parent, Vector3 origin, Vector3 direction, float length, float radius,

@@ -28,6 +28,8 @@ namespace TreeWizardDev
             public string[] LeafSheetPrefixes;
             public string BarkFile;
             public Func<TreeDefinition> Definition;
+            /// <summary>Multiplies the leaf texture, e.g. to darken bright source sheets.</summary>
+            public Color LeafTint = Color.white;
         }
 
         static Species[] All => new[]
@@ -45,6 +47,7 @@ namespace TreeWizardDev
                 LeafSheetPrefixes = new[] { "spruce-branch-tips", "six-spruce-branch-tips" },
                 BarkFile = "Spruce-bark-texture-seamless-tile-258.png",
                 Definition = Spruce,
+                LeafTint = new Color(0.62f, 0.72f, 0.72f), // spruce is a darker blue-green than the generated sheets
             },
         };
 
@@ -70,18 +73,21 @@ namespace TreeWizardDev
                     length = 0.28f, lengthAtEnd = 0.08f, lengthVariance = 0.15f,
                     radius = 0.4f, gravity = 0.2f, crookedness = 0.08f, segments = 5,
                 },
+                // Twigs spread mostly flat to either side of each limb and hang down, carrying the sprays.
                 new BranchLevelSettings
                 {
-                    count = 7, start = 0.15f, end = 0.95f,
-                    angle = 55f, angleVariance = 12f,
-                    length = 0.38f, lengthAtEnd = 0.55f, lengthVariance = 0.25f,
-                    radius = 0.6f, gravity = 0.1f, crookedness = 0.15f, segments = 3,
+                    count = 9, start = 0.15f, end = 0.95f,
+                    angle = 60f, angleVariance = 12f, flatten = 0.7f,
+                    length = 0.5f, lengthAtEnd = 0.55f, lengthVariance = 0.25f,
+                    radius = 0.6f, gravity = 0.4f, crookedness = 0.15f, segments = 3,
                 },
             },
+            // Many small tips laid flat along each twig, fishbone style. Cards that face the camera read as broad
+            // leaves at a distance, so they stay flat and the layers give the conifer look.
             leaves = new LeafSettings
             {
-                count = 5, start = 0.05f, size = 0.62f, sizeVariance = 0.25f, angle = 25f,
-                outward = 0.2f, // conifer sprays lie mostly flat, which gives the layered look
+                count = 14, start = 0f, size = 0.36f, sizeVariance = 0.25f, angle = 55f,
+                flatten = 0.9f, outward = 0f, canopyNormals = 0.85f,
             },
             mesh = new MeshSettings { radialSegments = 8, minRadialSegments = 3 },
         };
@@ -114,7 +120,7 @@ namespace TreeWizardDev
             var atlas = BuildAtlas(species, $"{dir}/{species.Name}Leaves.asset");
             var barkTexture = BuildBark(species, $"{dir}/{species.Name}Bark.jpg", $"{dir}/{species.Name}BarkNormal.png", out var barkNormal);
             var bark = TreeMaterial($"{dir}/{species.Name}Bark.mat", barkTexture, false, barkNormal);
-            var leaves = TreeMaterial($"{dir}/{species.Name}Leaves.mat", atlas.texture, true);
+            var leaves = TreeMaterial($"{dir}/{species.Name}Leaves.mat", atlas.texture, true, tint: species.LeafTint);
 
             var path = $"{dir}/{species.Name}.asset";
             var preset = AssetDatabase.LoadAssetAtPath<TreePreset>(path);
@@ -193,7 +199,7 @@ namespace TreeWizardDev
         const string TreeShader = "Packages/com.treewizard.core/Shaders/Tree.shadergraph";
 
         /// <summary>A TreeWizard/Tree material (URP Lit plus wind). Leaves are alpha-clipped and flutter.</summary>
-        static Material TreeMaterial(string path, Texture2D texture, bool leaves, Texture2D normalMap = null)
+        static Material TreeMaterial(string path, Texture2D texture, bool leaves, Texture2D normalMap = null, Color? tint = null)
         {
             var shader = AssetDatabase.LoadAssetAtPath<Shader>(TreeShader);
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
@@ -207,7 +213,7 @@ namespace TreeWizardDev
                 material.shader = shader;
             }
 
-            material.SetColor("_BaseColor", texture != null ? Color.white : new Color(0.36f, 0.27f, 0.2f));
+            material.SetColor("_BaseColor", texture != null ? tint ?? Color.white : new Color(0.36f, 0.27f, 0.2f));
             material.SetTexture("_BaseMap", texture);
             material.SetTexture("_BumpMap", normalMap);
             material.SetFloat("_BumpScale", 1f);

@@ -28,6 +28,7 @@ MonoBehaviour:
       end: 0.97
       angle: 82
       angleVariance: 8
+      flatten: 0
       length: 0.28
       lengthAtEnd: 0.08
       lengthVariance: 0.15
@@ -35,28 +36,30 @@ MonoBehaviour:
       gravity: 0.2
       crookedness: 0.08
       segments: 5
-    - count: 7
+    - count: 9
       start: 0.15
       end: 0.95
-      angle: 55
+      angle: 60
       angleVariance: 12
-      length: 0.38
+      flatten: 0.7
+      length: 0.5
       lengthAtEnd: 0.55
       lengthVariance: 0.25
       radius: 0.6
-      gravity: 0.1
+      gravity: 0.4
       crookedness: 0.15
       segments: 3
     leaves:
       enabled: 1
-      count: 5
-      start: 0.05
-      size: 0.62
+      count: 14
+      start: 0
+      size: 0.36
       sizeVariance: 0.25
-      angle: 25
+      angle: 55
+      flatten: 0.9
       shape: 0
-      outward: 0.2
-      canopyNormals: 0.6
+      outward: 0
+      canopyNormals: 0.85
       autumn: 0
     mesh:
       radialSegments: 8

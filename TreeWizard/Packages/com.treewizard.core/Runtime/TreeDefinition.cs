@@ -81,6 +81,9 @@ namespace TreeWizard
 
         [Range(0f, 90f)] public float angleVariance = 10f;
 
+        [Tooltip("0: branches spiral all around the parent. 1: they spread flat to either side, giving layered sprays like a spruce. Has no effect on a vertical parent.")]
+        [Range(0f, 1f)] public float flatten;
+
         [Tooltip("Length as a fraction of the parent's length.")]
         [Range(0f, 2f)] public float length = 0.45f;
 
@@ -130,6 +133,9 @@ namespace TreeWizard
 
         [Tooltip("Angle away from the branch, in degrees.")]
         [Range(0f, 90f)] public float angle = 45f;
+
+        [Tooltip("0: leaves spiral all around the branch. 1: they spread flat to either side, like the shoots on a fir branch or a fern frond.")]
+        [Range(0f, 1f)] public float flatten;
 
         public LeafShape shape = LeafShape.Quad;
 

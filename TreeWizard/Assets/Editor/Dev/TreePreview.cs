@@ -43,9 +43,10 @@ namespace TreeWizardDev
 
         /// <summary>
         /// Renders a row of trees from the named preset (one per seed) in a temporary scene, then
-        /// reopens the scene that was open before.
+        /// reopens the scene that was open before. <paramref name="tweak"/> can change the settings first, for trying ideas
+        /// without rebuilding the preset.
         /// </summary>
-        public static void RenderTo(string outPath, string presetName, int seeds, float autumn)
+        public static void RenderTo(string outPath, string presetName, int seeds, float autumn, Action<TreeDefinition> tweak = null)
         {
             var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
             var preset = AssetDatabase.LoadAssetAtPath<TreePreset>($"Packages/com.treewizard.core/Presets/{presetName}/{presetName}.asset");
@@ -64,6 +65,7 @@ namespace TreeWizardDev
                     tree.ApplyPreset(preset);
                     tree.definition.seed = i + 1;
                     tree.definition.leaves.autumn = autumn;
+                    tweak?.Invoke(tree.definition);
                     tree.Rebuild();
                     var b = tree.GetComponent<MeshRenderer>().bounds;
                     if (i == 0)
@@ -108,9 +110,12 @@ namespace TreeWizardDev
         }
 
         /// <summary>Renders <paramref name="target"/> from a 3/4 view with a temporary camera. Works while the Editor is unfocused.</summary>
-        public static void Capture(GameObject target, string outPath, int width = 900, int height = 900)
+        public static void Capture(GameObject target, string outPath, int width = 900, int height = 900) =>
+            Capture(target.GetComponent<Renderer>().bounds, outPath, width, height);
+
+        /// <summary>Renders the region <paramref name="bounds"/> from a 3/4 view, e.g. part of a tree for a close-up.</summary>
+        public static void Capture(Bounds bounds, string outPath, int width = 900, int height = 900)
         {
-            var bounds = target.GetComponent<Renderer>().bounds;
             var cam = new GameObject("TreePreview Camera") { hideFlags = HideFlags.HideAndDontSave }.AddComponent<Camera>();
             try
             {

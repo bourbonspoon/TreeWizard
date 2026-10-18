@@ -154,6 +154,50 @@ namespace TreeWizard.Editor.Tests
                 Assert.Less(upness, 0.5f, "cards mostly face sideways");
         }
 
+        // Straight horizontal limbs off a straight trunk, so "flat" means horizontal.
+        static TreeDefinition HorizontalLimbs(float flatten)
+        {
+            var def = new TreeDefinition();
+            def.trunk.crookedness = 0f;
+            var limbs = new BranchLevelSettings { angle = 90f, angleVariance = 0f, gravity = 0f, crookedness = 0f };
+            var twigs = new BranchLevelSettings { angle = 60f, gravity = 0f, crookedness = 0f, flatten = flatten };
+            def.branchLevels = new[] { limbs, twigs };
+            def.leaves.flatten = flatten;
+            return def;
+        }
+
+        [TestCase(0f)]
+        [TestCase(1f)]
+        public void Flatten_SpreadsTwigsAndLeavesFlatAlongTheBranch(float flatten)
+        {
+            var skeleton = TreeSkeleton.Generate(HorizontalLimbs(flatten));
+            var twigRise = skeleton.branches.Where(b => b.level == 2).Average(b => Mathf.Abs(b.nodes[0].tangent.y));
+            var leafRise = skeleton.leaves.Average(l => Mathf.Abs(l.up.y));
+
+            if (flatten == 0f)
+            {
+                Assert.Greater(twigRise, 0.3f, "twigs spiral up and down around the limb");
+                Assert.Greater(leafRise, 0.3f, "leaves spiral up and down around the twig");
+            }
+            else
+            {
+                Assert.Less(twigRise, 0.01f, "twigs lie in the limb's horizontal plane");
+                Assert.Less(leafRise, 0.01f, "leaves lie in the twig's horizontal plane");
+            }
+        }
+
+        [Test]
+        public void Flatten_KeepsTheAngleFromTheBranch()
+        {
+            var flat = TreeSkeleton.Generate(HorizontalLimbs(1f));
+            foreach (var twig in flat.branches.Where(b => b.level == 2))
+            {
+                var limb = flat.branches[twig.parent];
+                var angle = Vector3.Angle(limb.nodes[0].tangent, twig.nodes[0].tangent);
+                Assert.That(angle, Is.InRange(60f - 10f - 0.5f, 60f + 10f + 0.5f)); // angle ± angleVariance
+            }
+        }
+
         [Test]
         public void DefaultTree_StaysLightweight()
         {
