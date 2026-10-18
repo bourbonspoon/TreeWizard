@@ -111,8 +111,8 @@ namespace TreeWizardDev
             var dir = $"{Presets}/{species.Name}";
             Directory.CreateDirectory(dir);
             var atlas = BuildAtlas(species, $"{dir}/{species.Name}Leaves.asset");
-            var barkTexture = BuildBark(species, $"{dir}/{species.Name}Bark.jpg");
-            var bark = Lit($"{dir}/{species.Name}Bark.mat", barkTexture, false);
+            var barkTexture = BuildBark(species, $"{dir}/{species.Name}Bark.jpg", $"{dir}/{species.Name}BarkNormal.png", out var barkNormal);
+            var bark = Lit($"{dir}/{species.Name}Bark.mat", barkTexture, false, barkNormal);
             var leaves = Lit($"{dir}/{species.Name}Leaves.mat", atlas.texture, true);
 
             var path = $"{dir}/{species.Name}.asset";
@@ -129,7 +129,7 @@ namespace TreeWizardDev
             EditorUtility.SetDirty(preset);
             AssetDatabase.SaveAssets();
             Debug.Log($"[PresetBuilder] {species.Name}: {atlas.cells.Count} leaf cells ({atlas.cells.Count(c => c.autumn)} autumn), " +
-                      $"{atlas.texture.width}px atlas, bark {(barkTexture != null ? barkTexture.width + "px" : "none")}");
+                      $"{atlas.texture.width}px atlas, bark {(barkTexture != null ? barkTexture.width + "px" : "none")}, normal map {(barkNormal != null ? "yes" : "no")}");
         }
 
         static LeafAtlas BuildAtlas(Species species, string assetPath)
@@ -147,8 +147,11 @@ namespace TreeWizardDev
             return existing;
         }
 
-        /// <summary>Copies the bark tile into the package as a JPG (it has no alpha, and JPG is a fraction of the size).</summary>
-        static Texture2D BuildBark(Species species, string assetPath)
+        /// <summary>
+        /// Copies the bark tile into the package as a JPG (it has no alpha, and JPG is a fraction of the
+        /// size) and generates its normal map, kept as PNG because JPG artefacts show up in lighting.
+        /// </summary>
+        static Texture2D BuildBark(Species species, string assetPath, string normalPath, out Texture2D normal)
         {
             var source = Path.Combine(RawTextures, species.BarkFile);
             if (File.Exists(source))
@@ -156,24 +159,38 @@ namespace TreeWizardDev
                 var texture = new Texture2D(2, 2);
                 texture.LoadImage(File.ReadAllBytes(source));
                 File.WriteAllBytes(assetPath, texture.EncodeToJPG(90));
-                UnityEngine.Object.DestroyImmediate(texture);
 
-                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
-                var importer = (TextureImporter)AssetImporter.GetAtPath(assetPath);
-                importer.wrapMode = TextureWrapMode.Repeat;
-                importer.mipmapEnabled = true;
-                importer.anisoLevel = 4;
-                importer.maxTextureSize = 1024;
-                importer.SaveAndReimport();
+                var normals = new Texture2D(texture.width, texture.height, TextureFormat.RGB24, false);
+                normals.SetPixels32(NormalMapGenerator.FromAlbedo(texture.GetPixels32(), texture.width, texture.height));
+                File.WriteAllBytes(normalPath, normals.EncodeToPNG());
+                UnityEngine.Object.DestroyImmediate(texture);
+                UnityEngine.Object.DestroyImmediate(normals);
+
+                ImportTiling(assetPath, false);
+                ImportTiling(normalPath, true);
             }
+            normal = AssetDatabase.LoadAssetAtPath<Texture2D>(normalPath);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+        }
+
+        static void ImportTiling(string path, bool normalMap)
+        {
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            if (normalMap)
+                importer.textureType = TextureImporterType.NormalMap;
+            importer.wrapMode = TextureWrapMode.Repeat;
+            importer.mipmapEnabled = true;
+            importer.anisoLevel = 4;
+            importer.maxTextureSize = 1024;
+            importer.SaveAndReimport();
         }
 
         static IEnumerable<string> SourceFiles() =>
             Directory.Exists(RawTextures) ? Directory.GetFiles(RawTextures, "*.png") : Enumerable.Empty<string>();
 
         /// <summary>URP Lit material; alpha-clipped for leaves.</summary>
-        static Material Lit(string path, Texture2D texture, bool cutout)
+        static Material Lit(string path, Texture2D texture, bool cutout, Texture2D normalMap = null)
         {
             var material = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (material == null)
@@ -184,6 +201,12 @@ namespace TreeWizardDev
             material.SetColor("_BaseColor", texture != null ? Color.white : new Color(0.36f, 0.27f, 0.2f));
             material.SetTexture("_BaseMap", texture);
             material.SetFloat("_Smoothness", 0.15f);
+            material.SetTexture("_BumpMap", normalMap);
+            material.SetFloat("_BumpScale", 1f);
+            if (normalMap != null)
+                material.EnableKeyword("_NORMALMAP");
+            else
+                material.DisableKeyword("_NORMALMAP");
             if (cutout)
             {
                 material.SetFloat("_AlphaClip", 1f);

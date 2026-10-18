@@ -326,6 +326,8 @@ namespace TreeWizard.Fbx
                     if (material.AlphaFromDiffuseTexture)
                         Connect("OP", texture, id, "TransparentColor");
                 }
+                if (!string.IsNullOrEmpty(material.NormalTexture))
+                    Connect("OP", TextureId(material.NormalTexture), id, "NormalMap");
                 return id;
             }
 

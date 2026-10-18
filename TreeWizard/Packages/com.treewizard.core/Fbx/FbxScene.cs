@@ -77,6 +77,8 @@ namespace TreeWizard.Fbx
         public string DiffuseTexture;
         /// <summary>Also use the diffuse texture's alpha as transparency (leaves, cutouts).</summary>
         public bool AlphaFromDiffuseTexture;
+        /// <summary>Optional tangent-space normal map (+Y up), relative to the FBX file or absolute.</summary>
+        public string NormalTexture;
 
         public FbxMaterial(string name) => Name = name;
     }

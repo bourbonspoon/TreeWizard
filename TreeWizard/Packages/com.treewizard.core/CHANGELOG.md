@@ -12,7 +12,9 @@ All notable changes to this package are documented here. The format follows [Kee
 - Autumn setting: the share of leaves drawn from an atlas's autumn-coloured cells. Greens through blue-greens count as summer.
 - Oak leaf atlas preset (36 summer and autumn twigs).
 - Spruce preset: conical tiered shape, 18 spruce sprays, spruce bark.
-- Bark textures for both presets (seamless tiles, stored as JPG).
+- Bark textures for both presets (seamless tiles, stored as JPG), with normal maps.
+- `NormalMapGenerator`: builds seamless tangent-space normal maps from colour textures (brightness as height); runs in builds too.
+- FBX export includes bark normal maps (`FbxMaterial.NormalTexture`), picked up by Unity's and Blender's importers. Opaque textures are exported without an alpha channel.
 - Tree presets (`TreePreset`): shape settings plus bark material, leaf material and leaf atlas. Ships with an Oak preset.
 - **GameObject > 3D Object > TreeWizard Tree** creates a tree from the Oak preset.
 - Tree inspector: preset picker, seed randomizer, foldable sections, add/remove branch levels, live triangle counts, Save as Preset and Bake to Prefab.

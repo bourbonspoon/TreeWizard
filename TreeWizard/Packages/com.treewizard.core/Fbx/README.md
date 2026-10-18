@@ -2,7 +2,7 @@
 
 A small binary FBX 7.4 writer with no Unity dependency. The assembly sets `noEngineReferences` and uses `System.Numerics` types, so it works in any Unity project, in built players, or in plain .NET.
 
-It writes static meshes: positions, normals, one UV set, per-polygon materials, diffuse colour and diffuse textures, inside a hierarchy of models. Animation, skinning, cameras and lights are not supported.
+It writes static meshes: positions, normals, one UV set, per-polygon materials, diffuse colour, diffuse and normal-map textures, inside a hierarchy of models. Animation, skinning, cameras and lights are not supported.
 
 The output is checked by importing it through Unity's FBX importer and through Blender's.
 

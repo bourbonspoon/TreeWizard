@@ -101,6 +101,8 @@ namespace TreeWizard.Editor.Tests
             Assert.AreEqual(source.b, bark.color.b, 0.01f, "colour survives the round trip");
 
             Assert.IsTrue(File.Exists($"{Folder}/Oak_Leaves.png"), "leaf texture written beside the FBX");
+            Assert.IsTrue(File.Exists($"{Folder}/Oak_Bark_Normal.png"), "bark normal map written beside the FBX");
+            Assert.IsNotNull(bark.GetTexture("_BumpMap"), "Unity picks up the normal map");
             var leafTexture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{Folder}/Oak_Leaves.png");
             Assert.IsNotNull(leafTexture);
         }

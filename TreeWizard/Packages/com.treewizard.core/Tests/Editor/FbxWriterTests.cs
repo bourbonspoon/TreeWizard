@@ -91,6 +91,21 @@ namespace TreeWizard.Editor.Tests
         }
 
         [Test]
+        public void NormalMap_IsLinkedToItsMaterial()
+        {
+            var scene = QuadScene("a.png");
+            scene.Models[0].Materials[0].NormalTexture = "a_Normal.png";
+            var nodes = FbxTestReader.Read(Bytes(scene));
+            var objects = nodes.Single(n => n.Name == "Objects").Children;
+            var connections = nodes.Single(n => n.Name == "Connections").Children;
+
+            var normalTexture = objects.Single(o => o.Name == "Texture" && (string)o.Find("RelativeFilename").Properties[0] == "a_Normal.png");
+            var link = connections.Single(c => (long)c.Properties[1] == (long)normalTexture.Properties[0]);
+            Assert.AreEqual("OP", link.Properties[0]);
+            Assert.AreEqual("NormalMap", link.Properties[3]);
+        }
+
+        [Test]
         public void Geometry_EncodesPolygonsAndPerPolygonMaterials()
         {
             var geometry = Geometry(Bytes(QuadScene()));

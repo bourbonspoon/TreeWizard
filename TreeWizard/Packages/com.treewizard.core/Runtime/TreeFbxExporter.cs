@@ -48,10 +48,31 @@ namespace TreeWizard
             material.DiffuseColor = new N.Vector3(color.r, color.g, color.b);
             if (source.mainTexture != null)
             {
-                var file = name + ".png";
-                SaveTexturePng(source.mainTexture, Path.Combine(directory, file));
-                material.DiffuseTexture = file;
-                material.AlphaFromDiffuseTexture = cutout;
+                // Opaque materials get an RGB file, so importers don't hook up an alpha channel they shouldn't use.
+                var albedo = ReadPixels(source.mainTexture, cutout);
+                try
+                {
+                    var file = name + ".png";
+                    File.WriteAllBytes(Path.Combine(directory, file), albedo.EncodeToPNG());
+                    material.DiffuseTexture = file;
+                    material.AlphaFromDiffuseTexture = cutout;
+
+                    // An imported normal map is GPU-compressed with swizzled channels, so rather than copy
+                    // it back out, rebuild it from the colour texture the way the presets' maps were made.
+                    if (source.HasProperty("_BumpMap") && source.GetTexture("_BumpMap") != null)
+                    {
+                        var normals = new Texture2D(albedo.width, albedo.height, TextureFormat.RGB24, false);
+                        normals.SetPixels32(NormalMapGenerator.FromAlbedo(albedo.GetPixels32(), albedo.width, albedo.height));
+                        var normalFile = name + "_Normal.png";
+                        File.WriteAllBytes(Path.Combine(directory, normalFile), normals.EncodeToPNG());
+                        Object.DestroyImmediate(normals);
+                        material.NormalTexture = normalFile;
+                    }
+                }
+                finally
+                {
+                    Object.DestroyImmediate(albedo);
+                }
             }
             return material;
         }
@@ -67,27 +88,42 @@ namespace TreeWizard
         }
 
         /// <summary>
-        /// Saves any texture as PNG, including ones that aren't CPU-readable or are GPU-compressed,
-        /// by drawing it into a render texture and reading that back.
+        /// Saves any texture as PNG, including ones that aren't CPU-readable or are GPU-compressed.
         /// </summary>
         public static void SaveTexturePng(Texture texture, string path)
         {
+            var readable = ReadPixels(texture, true);
+            try
+            {
+                File.WriteAllBytes(path, readable.EncodeToPNG());
+            }
+            finally
+            {
+                Object.DestroyImmediate(readable);
+            }
+        }
+
+        /// <summary>
+        /// A CPU-readable copy of any texture, made by drawing it into a render texture and reading
+        /// that back. The caller destroys it.
+        /// </summary>
+        static Texture2D ReadPixels(Texture texture, bool keepAlpha)
+        {
             var rt = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
             var previous = RenderTexture.active;
-            var readable = new Texture2D(texture.width, texture.height, TextureFormat.RGBA32, false);
+            var readable = new Texture2D(texture.width, texture.height, keepAlpha ? TextureFormat.RGBA32 : TextureFormat.RGB24, false);
             try
             {
                 Graphics.Blit(texture, rt);
                 RenderTexture.active = rt;
                 readable.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
                 readable.Apply();
-                File.WriteAllBytes(path, readable.EncodeToPNG());
+                return readable;
             }
             finally
             {
                 RenderTexture.active = previous;
                 RenderTexture.ReleaseTemporary(rt);
-                Object.DestroyImmediate(readable);
             }
         }
     }
