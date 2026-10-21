@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,6 +23,27 @@ namespace TreeWizard.Editor
             tree.Rebuild();
             Selection.activeGameObject = go;
         }
+
+        [MenuItem("Assets/TreeWizard/Bake Impostor", false, 1100)]
+        static void BakeImpostor()
+        {
+            foreach (var path in SelectedPrefabs())
+                ImpostorBaker.Bake(path);
+        }
+
+        [MenuItem("Assets/TreeWizard/Remove Impostor", false, 1101)]
+        static void RemoveImpostor()
+        {
+            foreach (var path in SelectedPrefabs())
+                ImpostorBaker.Remove(path);
+        }
+
+        [MenuItem("Assets/TreeWizard/Bake Impostor", true)]
+        [MenuItem("Assets/TreeWizard/Remove Impostor", true)]
+        static bool PrefabsSelected() => SelectedPrefabs().Any();
+
+        static IEnumerable<string> SelectedPrefabs() =>
+            Selection.GetFiltered<GameObject>(SelectionMode.Assets).Select(AssetDatabase.GetAssetPath).Where(p => p.EndsWith(".prefab"));
 
         [MenuItem("GameObject/TreeWizard/Wind", false, 21)]
         static void CreateWind(MenuCommand command)

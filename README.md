@@ -13,7 +13,8 @@ A free, open-source procedural tree generator, in the spirit of SpeedTree.
 - Leaf atlases sliced automatically from leaf or twig sheets, with summer/autumn mixing.
 - Bark textures with generated normal maps.
 - `TreeWizard/Tree` URP shader with wind (sway, branch bob, leaf flutter). Add **GameObject > TreeWizard > Wind** to a scene.
-- Unity: **GameObject > 3D Object > TreeWizard Tree**, live inspector, Bake to Prefab, Export FBX.
+- Unity: **GameObject > 3D Object > TreeWizard Tree**, live inspector, Bake to Prefab (bark and leaves as separate meshes), Export FBX.
+- Impostors for distant trees: lit at runtime from albedo and normal atlases, cast shadows, and switch in through a LODGroup with dithered cross-fade.
 - Standalone app: design trees, use your own bark and leaf sheet images and choose the leaf mix, save/open designs with undo/redo and unsaved-change prompts, export FBX with textures. The UI follows the display scale (Retina, Windows scaling); Cmd/Ctrl + and - resize it, 0 resets.
 - FBX export checked in Unity, Blender, Unreal Engine 5.8 and Godot 4.7: one mesh with bark and leaf materials, textures and bark normal maps hooked up, real-world scale. Unreal imports leaves as Masked; in Godot, switch the leaf material's transparency to Alpha Scissor for cutout leaves.
 - Reusable pieces with their own assemblies and no dependency on the rest of TreeWizard: a binary FBX writer (`Fbx/`) and a UI Toolkit file browser for built players (`FileBrowser/`).

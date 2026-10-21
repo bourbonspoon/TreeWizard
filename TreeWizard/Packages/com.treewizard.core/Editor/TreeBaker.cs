@@ -22,8 +22,10 @@ namespace TreeWizard.Editor
         /// Baking over an existing prefab updates it in place: the prefab, its root, its parts and their meshes
         /// keep their IDs, so anything referencing them keeps working. A prefab from an older bake, with one
         /// mesh embedded on the root, is converted, keeping the root's IDs.
+        /// <para>With <paramref name="impostor"/> set, an impostor is baked too (see <see cref="ImpostorBaker"/>). Left null,
+        /// a prefab that already has an impostor gets it re-captured with its current settings, so it never goes stale.</para>
         /// </summary>
-        public static GameObject BakeToPrefab(TreeWizardTree tree, string prefabPath)
+        public static GameObject BakeToPrefab(TreeWizardTree tree, string prefabPath, ImpostorSettings impostor = null)
         {
             if (tree.Mesh == null)
                 tree.Rebuild();
@@ -68,12 +70,14 @@ namespace TreeWizard.Editor
             }
             if (embedded.Count > 0)
                 AssetDatabase.SaveAssets();
+            if (impostor != null || ImpostorBaker.HasImpostor(prefab))
+                prefab = ImpostorBaker.Bake(prefabPath, impostor);
             return prefab;
         }
 
         // A child holding one mesh. It takes the root's layer, tag and static flags, so settings made on the
         // root (as a game's bake script might) carry over to the renderers on every bake.
-        static void SetPart(GameObject root, string partName, Mesh mesh, Material material)
+        internal static MeshRenderer SetPart(GameObject root, string partName, Mesh mesh, Material material)
         {
             var part = root.transform.Find(partName)?.gameObject;
             if (part == null)
@@ -90,10 +94,11 @@ namespace TreeWizard.Editor
                 renderer = part.AddComponent<MeshRenderer>();
             filter.sharedMesh = mesh;
             renderer.sharedMaterial = material;
+            return renderer;
         }
 
         // Writes the mesh to its own asset file. An existing file is overwritten in place, keeping its GUID.
-        static Mesh SaveMesh(Mesh mesh, string path)
+        internal static Mesh SaveMesh(Mesh mesh, string path)
         {
             mesh.name = Path.GetFileNameWithoutExtension(path);
             var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);

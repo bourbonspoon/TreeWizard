@@ -48,6 +48,14 @@ namespace TreeWizard.Editor
             actions.Add(Grow(new Button(SaveAsPreset) { text = "Save as Preset…" }));
             actions.Add(Grow(new Button(BakeToPrefab) { text = "Bake to Prefab…" }));
             root.Add(actions);
+            var impostor = new Toggle("Bake Impostor")
+            {
+                value = EditorPrefs.GetBool(BakeImpostorKey, false),
+                tooltip = "Also bake a flat, camera-facing stand-in for the distance, switched in by a LODGroup. "
+                    + "A prefab that already has one is always re-captured, keeping its settings.",
+            };
+            impostor.RegisterValueChangedCallback(e => EditorPrefs.SetBool(BakeImpostorKey, e.newValue));
+            root.Add(impostor);
             root.Add(new Button(ExportFbx) { text = "Export FBX…", tooltip = "Write the tree as FBX, with its textures as PNGs beside it" });
 
             // Undo or an outside edit can change the number of branch levels.
@@ -206,7 +214,10 @@ namespace TreeWizard.Editor
                 "Save the tree as a static prefab. Baking over an existing prefab updates it in place.");
             if (string.IsNullOrEmpty(path))
                 return;
-            EditorGUIUtility.PingObject(TreeBaker.BakeToPrefab(Tree, path));
+            ImpostorSettings impostor = null;
+            if (EditorPrefs.GetBool(BakeImpostorKey, false))
+                impostor = ImpostorBaker.ReadSettings(AssetDatabase.LoadAssetAtPath<GameObject>(path)) ?? new ImpostorSettings();
+            EditorGUIUtility.PingObject(TreeBaker.BakeToPrefab(Tree, path, impostor));
         }
 
         void ExportFbx()
@@ -225,6 +236,7 @@ namespace TreeWizard.Editor
         }
 
         const string LastExportFolderKey = "TreeWizard.LastExportFolder";
+        const string BakeImpostorKey = "TreeWizard.BakeImpostor";
 
         Foldout Section(string title, SerializedProperty property, bool expanded)
         {
