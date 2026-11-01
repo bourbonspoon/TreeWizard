@@ -71,7 +71,7 @@ namespace TreeWizardDev
                 crookedness = 0.06f,
                 segments = 12,
             },
-            roots = new RootSettings { count = 7, length = 6f, radius = 0.55f },
+            roots = new RootSettings { count = 7, radius = 0.55f },
             branchLevels = new[]
             {
                 new BranchLevelSettings
@@ -109,7 +109,7 @@ namespace TreeWizardDev
                 crookedness = 0.04f,
                 segments = 12,
             },
-            roots = new RootSettings { count = 5, length = 7f }, // spruce roots are shallow and spread wide
+            roots = new RootSettings { count = 5 },
             branchLevels = new[]
             {
                 // Tiers of near-horizontal, drooping limbs that shorten towards the top: the cone.

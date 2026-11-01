@@ -72,7 +72,7 @@ namespace TreeWizard
         [Range(0, 16)] public int count;
 
         [Tooltip("How far roots reach, as a multiple of the trunk's base radius.")]
-        [Range(0.5f, 20f)] public float length = 6f;
+        [Range(0.5f, 20f)] public float length = 4f;
 
         [Range(0f, 1f)] public float lengthVariance = 0.3f;
 
@@ -80,7 +80,7 @@ namespace TreeWizard
         [Range(0.05f, 1f)] public float radius = 0.5f;
 
         [Tooltip("How soon roots sink into the ground. 0: half buried about halfway along. 1: under the surface by halfway. Tips are always buried.")]
-        [Range(0f, 1f)] public float depth = 0.3f;
+        [Range(0f, 1f)] public float depth = 0.75f;
 
         [Tooltip("Snaking from side to side.")]
         [Range(0f, 1f)] public float crookedness = 0.5f;

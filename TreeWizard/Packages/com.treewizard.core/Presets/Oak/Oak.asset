@@ -24,10 +24,10 @@ MonoBehaviour:
       segments: 10
     roots:
       count: 6
-      length: 6
+      length: 4
       lengthVariance: 0.3
       radius: 0.5
-      depth: 0.3
+      depth: 0.75
       crookedness: 0.5
       segments: 6
     branchLevels:
