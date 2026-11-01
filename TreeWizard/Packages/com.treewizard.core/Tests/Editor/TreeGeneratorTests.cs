@@ -235,6 +235,39 @@ namespace TreeWizard.Editor.Tests
         }
 
         [Test]
+        public void FollowLength_GivesShortBranchesFewerSmallerLeaves()
+        {
+            // One level of limbs that shorten a lot towards the top, carrying the leaves directly.
+            TreeDefinition Conical(float followLength) => new TreeDefinition
+            {
+                branchLevels = new[] { new BranchLevelSettings { count = 20, lengthAtEnd = 0.1f, lengthVariance = 0f } },
+                leaves = { count = 8, sizeVariance = 0f, followLength = followLength },
+            };
+            var even = TreeSkeleton.Generate(Conical(0f));
+            var follow = TreeSkeleton.Generate(Conical(1f));
+
+            Assert.AreEqual(20 * 8, even.leaves.Count);
+            Assert.Less(follow.leaves.Count, even.leaves.Count * 0.8f, "short limbs carry fewer leaves");
+            Assert.Greater(follow.leaves.Count, 0);
+            Assert.LessOrEqual(follow.leaves.Max(l => l.size), even.leaves[0].size + 1e-4f, "the longest limb keeps full-size leaves");
+            var middle = (follow.leaves.Min(l => l.position.y) + follow.leaves.Max(l => l.position.y)) * 0.5f;
+            var low = follow.leaves.Where(l => l.position.y < middle).ToList();
+            var high = follow.leaves.Where(l => l.position.y >= middle).ToList();
+            Assert.Greater(low.Count, high.Count, "more leaves on the long lower limbs");
+            Assert.Greater(low.Average(l => l.size), high.Average(l => l.size), "and bigger ones");
+        }
+
+        [Test]
+        public void FollowLength_Off_LeavesTheTreeAsItWas()
+        {
+            var def = new TreeDefinition();
+            Assert.AreEqual(0f, def.leaves.followLength, "off by default, so saved designs keep their look");
+            var a = TreeSkeleton.Generate(def);
+            var b = TreeSkeleton.Generate(def.Clone());
+            CollectionAssert.AreEqual(a.leaves.Select(l => l.size), b.leaves.Select(l => l.size));
+        }
+
+        [Test]
         public void DefaultTree_StaysLightweight()
         {
             Assert.Less(TreeGenerator.Generate(new TreeDefinition()).TriangleCount, 10000);

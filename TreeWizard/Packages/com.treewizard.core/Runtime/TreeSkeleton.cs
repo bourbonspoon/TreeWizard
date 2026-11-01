@@ -78,6 +78,7 @@ namespace TreeWizard
         const float MinRadius = 0.002f;
         const float MaxWobble = 1.5f;         // radians, spread over a branch's segments
         const int LeafStream = 1000;
+        const int LeafCountStream = 1001;
         const int RootStream = 2000;
         const float RootTipRadius = 0.3f;     // fraction of a root's base radius
         const float MaxRootTurn = 100f;       // degrees of sideways snaking per root at full crookedness
@@ -115,8 +116,11 @@ namespace TreeWizard
             if (def.leaves.enabled)
             {
                 var picker = new CellPicker(cells, def.leaves.cellWeights);
+                var longest = 0f;
                 for (var b = levelStart; b < levelEnd; b++)
-                    skeleton.AddLeaves(b, def.leaves, def.seed, picker);
+                    longest = Mathf.Max(longest, skeleton.branches[b].Length);
+                for (var b = levelStart; b < levelEnd; b++)
+                    skeleton.AddLeaves(b, def.leaves, def.seed, picker, longest);
             }
 
             if (def.roots != null && def.roots.count > 0)
@@ -217,15 +221,29 @@ namespace TreeWizard
             }
         }
 
-        void AddLeaves(int branchIndex, LeafSettings s, int seed, CellPicker picker)
+        void AddLeaves(int branchIndex, LeafSettings s, int seed, CellPicker picker, float longestBranch)
         {
             var branch = branches[branchIndex];
             var rng = new Rng(Rng.Combine(Rng.Combine(seed, LeafStream), branchIndex));
             var azimuthOffset = rng.Range(0f, 360f);
 
-            for (var i = 0; i < s.count; i++)
+            // Follow Length: shorter branches get proportionally fewer leaves (the fraction left over decides one
+            // more leaf by chance) and smaller ones. Off, nothing extra is drawn, so existing trees are unchanged.
+            var count = s.count;
+            var sizeScale = 1f;
+            if (s.followLength > 0f && longestBranch > 0f)
             {
-                var f = Mathf.Clamp01((i + 0.5f + rng.Range(-0.4f, 0.4f)) / s.count);
+                var share = Mathf.Lerp(1f, Mathf.Clamp01(branch.Length / longestBranch), s.followLength);
+                var exact = s.count * share;
+                count = Mathf.FloorToInt(exact);
+                if (new Rng(Rng.Combine(Rng.Combine(seed, LeafCountStream), branchIndex)).Value() < exact - count)
+                    count++;
+                sizeScale = Mathf.Sqrt(share);
+            }
+
+            for (var i = 0; i < count; i++)
+            {
+                var f = Mathf.Clamp01((i + 0.5f + rng.Range(-0.4f, 0.4f)) / count);
                 var at = branch.Sample(Mathf.Lerp(s.start, 1f, f));
 
                 var azimuth = azimuthOffset + i * GoldenAngle + rng.Range(-15f, 15f);
@@ -247,7 +265,7 @@ namespace TreeWizard
                     up = up,
                     width = width,
                     normal = Vector3.Cross(up, width).normalized,
-                    size = s.size * (1f + rng.Range(-1f, 1f) * s.sizeVariance),
+                    size = s.size * sizeScale * (1f + rng.Range(-1f, 1f) * s.sizeVariance),
                     cell = picker.Pick(rng.Value() < s.autumn, rng.Value()),
                 });
             }

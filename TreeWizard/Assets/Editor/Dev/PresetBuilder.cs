@@ -56,6 +56,13 @@ namespace TreeWizardDev
                 BarkFile = "Beech-bark-seamless-texture-271.png", // the smoothest of the three, as beech bark is
                 Definition = Beech,
             },
+            new Species
+            {
+                Name = "Redwood",
+                LeafSheetPrefixes = new[] { "redwood-sprays" },
+                BarkFile = "redwood-bark-seamless-1.png", // redwood-bark-1 with its top and bottom blended to tile
+                Definition = Redwood,
+            },
         };
 
         static TreeDefinition Beech() => new TreeDefinition
@@ -95,6 +102,41 @@ namespace TreeWizardDev
                 count = 9, start = 0.2f, size = 0.6f, sizeVariance = 0.25f, angle = 50f,
                 flatten = 0.3f, outward = 0.5f, canopyNormals = 0.65f,
             },
+        };
+
+        static TreeDefinition Redwood() => new TreeDefinition
+        {
+            // A giant: a tall, straight, slowly tapering trunk, bare for the lower half, under a crown about 35 m
+            // across at its foot that narrows to the top. Its limbs carry whole foliage sprays several metres across,
+            // more and bigger on the long lower limbs (Follow Length), so neighbouring crowns close overhead with
+            // a couple of hundred cards rather than thousands of leaves.
+            trunk = new TrunkSettings
+            {
+                height = 55f,
+                radius = 1.1f,
+                tipRadius = 0.06f,
+                flare = 0.9f,
+                flareHeight = 0.05f,
+                crookedness = 0.03f,
+                segments = 28,
+            },
+            roots = new RootSettings { count = 8, radius = 0.45f },
+            branchLevels = new[]
+            {
+                new BranchLevelSettings
+                {
+                    count = 36, start = 0.5f, end = 0.95f,
+                    angle = 86f, angleVariance = 8f,
+                    length = 0.28f, lengthAtEnd = 0.06f, lengthVariance = 0.15f,
+                    radius = 0.3f, gravity = 0.2f, crookedness = 0.15f, segments = 6,
+                },
+            },
+            leaves = new LeafSettings
+            {
+                count = 8, start = 0.2f, size = 8f, sizeVariance = 0.3f, followLength = 1f, angle = 30f,
+                flatten = 0.6f, outward = 0.2f, canopyNormals = 0.8f,
+            },
+            mesh = new MeshSettings { radialSegments = 12, minRadialSegments = 4 },
         };
 
         static TreeDefinition Spruce() => new TreeDefinition

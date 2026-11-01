@@ -156,6 +156,11 @@ namespace TreeWizard
 
         [Range(0f, 1f)] public float sizeVariance = 0.3f;
 
+        [Tooltip("Gives short branches fewer, smaller leaves: each branch's leaf count scales with its length relative to the " +
+                 "longest branch, and leaf size with the square root of that. For crowns that are widest at the foot, like " +
+                 "conifers and giant redwoods. 0: every branch gets the same.")]
+        [Range(0f, 1f)] public float followLength;
+
         [Tooltip("Angle away from the branch, in degrees.")]
         [Range(0f, 90f)] public float angle = 45f;
 

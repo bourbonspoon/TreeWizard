@@ -121,6 +121,79 @@ namespace TreeWizardDev
             }
         }
 
+        /// <summary>
+        /// Renders a stand of trees from the named preset on a jittered grid <paramref name="spacing"/> metres apart,
+        /// seen from standing height inside it: one wide view looking up at <paramref name="pitch"/> degrees above the
+        /// horizon (negative is up). For judging whether big canopies close overhead and shade the floor.
+        /// </summary>
+        public static void RenderStand(string outPath, string presetName, float spacing, float pitch, Action<TreeDefinition> tweak = null, int rows = 6)
+        {
+            var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+            var presetPath = $"Packages/com.treewizard.core/Presets/{presetName}/{presetName}.asset";
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            try
+            {
+                var preset = AssetDatabase.LoadAssetAtPath<TreePreset>(presetPath)
+                             ?? throw new FileNotFoundException($"No preset named {presetName}");
+                var random = new System.Random(7);
+                var mesh = (Mesh)null;
+                for (var x = 0; x < rows; x++)
+                for (var z = 0; z < rows; z++)
+                {
+                    var tree = new GameObject($"Tree {x},{z}").AddComponent<TreeWizardTree>();
+                    var jitter = new Vector3((float)random.NextDouble() - 0.5f, 0f, (float)random.NextDouble() - 0.5f) * spacing * 0.5f;
+                    tree.transform.SetPositionAndRotation(new Vector3((x - (rows - 1) * 0.5f) * spacing, 0f, (z - (rows - 1) * 0.5f) * spacing) + jitter,
+                        Quaternion.Euler(0f, (float)random.NextDouble() * 360f, 0f));
+                    tree.ApplyPreset(preset);
+                    tree.definition.seed = x * rows + z + 1;
+                    tweak?.Invoke(tree.definition);
+                    tree.Rebuild();
+                    mesh = tree.Mesh;
+                }
+                Debug.Log($"[TreePreview] {presetName} stand: {rows * rows} trees, about {mesh.triangles.Length / 3} tris each");
+
+                var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                floor.transform.localScale = Vector3.one * spacing * rows * 0.2f;
+                floor.GetComponent<MeshRenderer>().sharedMaterial = Matte(new Color(0.45f, 0.43f, 0.38f));
+                var sun = new GameObject("Sun").AddComponent<Light>();
+                sun.type = LightType.Directional;
+                sun.intensity = 1.6f;
+                sun.shadows = LightShadows.Soft;
+                sun.transform.rotation = Quaternion.Euler(55f, -35f, 0f);
+                RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+                RenderSettings.ambientLight = new Color(0.45f, 0.5f, 0.6f);
+
+                var cam = new GameObject("Camera").AddComponent<Camera>();
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = new Color(0.62f, 0.75f, 0.88f);
+                cam.fieldOfView = 70f;
+                cam.aspect = 1.5f;
+                cam.nearClipPlane = 0.1f;
+                cam.farClipPlane = spacing * rows * 2f;
+                // Between trees, so no trunk fills the view.
+                cam.transform.SetPositionAndRotation(new Vector3(spacing * 0.5f, 1.7f, spacing * 0.5f), Quaternion.Euler(pitch, 20f, 0f));
+                // Shadows have to reach the canopy overhead, as in the game.
+                var urp = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+                var shadowDistance = urp != null ? urp.shadowDistance : 0f;
+                if (urp != null)
+                    urp.shadowDistance = Mathf.Max(shadowDistance, 120f);
+                try
+                {
+                    WriteRender(cam, 1200, 800, outPath);
+                }
+                finally
+                {
+                    if (urp != null)
+                        urp.shadowDistance = shadowDistance;
+                }
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(previous))
+                    EditorSceneManager.OpenScene(previous);
+            }
+        }
+
         /// <summary>Renders <paramref name="target"/> from a 3/4 view with a temporary camera. Works while the Editor is unfocused.</summary>
         public static void Capture(GameObject target, string outPath, int width = 900, int height = 900) =>
             Capture(target.GetComponent<Renderer>().bounds, outPath, width, height);

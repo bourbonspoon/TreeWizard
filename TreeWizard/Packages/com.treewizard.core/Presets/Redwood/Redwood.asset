@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1789ede45cbf141819cdbeff493ff98f, type: 3}
+  m_Name: Redwood
+  m_EditorClassIdentifier: TreeWizard.Runtime::TreeWizard.TreePreset
+  definition:
+    seed: 1
+    trunk:
+      height: 55
+      radius: 1.1
+      tipRadius: 0.06
+      flare: 0.9
+      flareHeight: 0.05
+      crookedness: 0.03
+      segments: 28
+    roots:
+      count: 8
+      length: 4
+      lengthVariance: 0.3
+      radius: 0.45
+      depth: 0.75
+      crookedness: 0.5
+      segments: 6
+    branchLevels:
+    - count: 36
+      start: 0.5
+      end: 0.95
+      angle: 86
+      angleVariance: 8
+      flatten: 0
+      length: 0.28
+      lengthAtEnd: 0.06
+      lengthVariance: 0.15
+      radius: 0.3
+      gravity: 0.2
+      crookedness: 0.15
+      segments: 6
+    leaves:
+      enabled: 1
+      count: 8
+      start: 0.2
+      size: 8
+      sizeVariance: 0.3
+      followLength: 1
+      angle: 30
+      flatten: 0.6
+      shape: 0
+      outward: 0.2
+      canopyNormals: 0.8
+      autumn: 0
+      cellWeights: []
+    mesh:
+      radialSegments: 12
+      minRadialSegments: 4
+  barkMaterial: {fileID: 2100000, guid: 7add7ba15dbf2407eac4882b09ac96bb, type: 2}
+  leafMaterial: {fileID: 2100000, guid: 96e4e226706204d2e841979f314d4fc9, type: 2}
+  leafAtlas: {fileID: 11400000, guid: 2f35f8032ace340c39cd4937d63afb6e, type: 2}
