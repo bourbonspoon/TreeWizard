@@ -16,61 +16,81 @@ MonoBehaviour:
   cells:
   - uvRect:
       serializedVersion: 2
-      x: 0.3203125
-      y: 0.3388672
-      width: 0.2607422
-      height: 0.3305664
-    pivot: {x: 0.49686322, y: 0.011816839}
-    aspect: 0.788774
+      x: 0
+      y: 0.6591797
+      width: 0.32470703
+      height: 0.3149414
+    pivot: {x: 0.72388715, y: 0.008403362}
+    aspect: 1.0315126
     autumn: 0
     weight: 1
   - uvRect:
       serializedVersion: 2
-      x: 0.5810547
-      y: 0.3388672
-      width: 0.30371094
-      height: 0.328125
-    pivot: {x: 0.45096463, y: 0.011904762}
-    aspect: 0.9255952
+      x: 0.32470703
+      y: 0.6591797
+      width: 0.32617188
+      height: 0.29541016
+    pivot: {x: 0.6247227, y: 0.008958567}
+    aspect: 1.1030235
     autumn: 0
     weight: 1
   - uvRect:
       serializedVersion: 2
-      x: 0.56103516
+      x: 0.3466797
+      y: 0.33544922
+      width: 0.32470703
+      height: 0.3232422
+    pivot: {x: 0.6938837, y: 0.0081883315}
+    aspect: 1.0040941
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.6713867
+      y: 0.33544922
+      width: 0.32617188
+      height: 0.3227539
+    pivot: {x: 0.84350914, y: 0.008196721}
+    aspect: 1.0102459
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.3359375
       y: 0
-      width: 0.31054688
-      height: 0.33789062
-    pivot: {x: 0.5028464, y: 0.011560693}
-    aspect: 0.91907513
+      width: 0.33398438
+      height: 0.3256836
+    pivot: {x: 0.52333546, y: 0.008130081}
+    aspect: 1.0254065
+    autumn: 0
+    weight: 1
+  - uvRect:
+      serializedVersion: 2
+      x: 0.6699219
+      y: 0
+      width: 0.32177734
+      height: 0.32373047
+    pivot: {x: 0.54431003, y: 0.008171604}
+    aspect: 0.9938713
     autumn: 0
     weight: 1
   - uvRect:
       serializedVersion: 2
       x: 0
       y: 0
-      width: 0.2607422
-      height: 0.3388672
-    pivot: {x: 0.48220974, y: 0.011527377}
-    aspect: 0.76945245
-    autumn: 0
-    weight: 1
-  - uvRect:
-      serializedVersion: 2
-      x: 0.2607422
-      y: 0
-      width: 0.30029297
-      height: 0.3383789
-    pivot: {x: 0.5206676, y: 0.0115440115}
-    aspect: 0.88744587
+      width: 0.3359375
+      height: 0.33544922
+    pivot: {x: 0.9279803, y: 0.007889546}
+    aspect: 1.0009862
     autumn: 0
     weight: 1
   - uvRect:
       serializedVersion: 2
       x: 0
-      y: 0.3388672
-      width: 0.3203125
-      height: 0.33789062
-    pivot: {x: 0.50914633, y: 0.011560693}
-    aspect: 0.9479769
+      y: 0.33544922
+      width: 0.3466797
+      height: 0.32373047
+    pivot: {x: 0.53953224, y: 0.008179959}
+    aspect: 1.0705521
     autumn: 0
     weight: 1

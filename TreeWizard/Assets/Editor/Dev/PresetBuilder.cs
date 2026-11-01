@@ -59,7 +59,7 @@ namespace TreeWizardDev
             new Species
             {
                 Name = "Redwood",
-                LeafSheetPrefixes = new[] { "redwood-sprays" },
+                LeafSheetPrefixes = new[] { "redwood-branches" }, // whole spreading branches: single fronds read as giant fern leaves from below
                 BarkFile = "redwood-bark-seamless-1.png", // redwood-bark-1 with its top and bottom blended to tile
                 Definition = Redwood,
             },
